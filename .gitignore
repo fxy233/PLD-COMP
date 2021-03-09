@@ -1,0 +1,9 @@
+compiler/*.sh
+compiler/Makefile
+compiler/antlr4-generated/
+compiler/output/
+compiler/ifcc
+compiler/*.c
+
+tests/*.sh
+tests/pld-test-output
