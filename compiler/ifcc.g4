@@ -9,6 +9,7 @@ list_expr : expr*;
 
 expr : 'int' VAR dec* ';'			    # declaration
 	 | 'int' VAR '=' val ';'  	        # definition
+	 |  VAR '=' val ';'					# affectation
 	 ;
 
 dec : ',' VAR  					# multiDeclaration 

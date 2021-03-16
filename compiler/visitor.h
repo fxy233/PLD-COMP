@@ -98,6 +98,41 @@ public:
     return 0;
   }
 
+  virtual antlrcpp::Any visitAffectation(ifccParser::AffectationContext *ctx) override {
+
+    string var_name(ctx->VAR()->getText());
+
+    if (variables.count(var_name) == 0)  // have been declared before
+    {       
+      cout << "error: a variable haven't been declared ! " << endl;
+      return ERROR; 
+    } 
+
+    if (variables[var_name] == 1)
+    {
+      cursor = cursor - 4;
+      variables[var_name] = cursor;
+    }
+
+    // movl %eax, -4(%rbp)
+
+    string val = visit(ctx->val()).as<std::string>();
+    string movl;
+    
+    if (val.at(0) == '$')   // CONST 
+    {
+       movl = "  movl  " + val + ", " + to_string(variables[var_name]) + "(%rbp)";
+    } else {                // VAR
+       movl = "  movl  " + val + ", %eax\n";
+       movl = movl + "  movl  %eax, " + to_string(variables[var_name]) + "(%rbp)";
+    }
+
+    cout << movl << endl;
+    return movl;
+
+  }
+
+
   virtual antlrcpp::Any visitMyReturn(ifccParser::MyReturnContext *ctx) override {
 
   	string ret = "  movl  " + visit(ctx->val()).as<std::string>() + ", %eax";
