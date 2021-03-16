@@ -4,6 +4,9 @@ compiler/antlr4-generated/
 compiler/output/
 compiler/ifcc
 compiler/*.c
+compiler/*.s
+compiler/*.o
+compiler/*.out
 
 tests/*.sh
 tests/pld-test-output

@@ -3,11 +3,11 @@ grammar ifcc;
 axiom : prog       
       ;
 
-prog : 'int' 'main' '(' ')' '{' list_expr RETURN CONST ';' '}' ;
+prog : 'int' 'main' '(' ')' '{' list_expr myreturn '}' ;
 
 list_expr : expr*;
 
-expr : 'int' VAR '=' val ';'  	    # affectation
+expr : 'int' VAR '=' val ';'  	    # declaration
 	 ;
 
 
@@ -15,8 +15,11 @@ val : CONST		# getConst
 	| VAR		# getVAR
 	; 
 
+myreturn : 'return' val ';'	# myReturn
+         ;
+
+
 VAR : [a-zA-Z][a-zA-Z0-9]* ;
-RETURN : 'return' ;
 CONST : [0-9]+ ;
 COMMENT : '/*' .*? '*/' -> skip ;
 DIRECTIVE : '#' .*? '\n' -> skip ;
