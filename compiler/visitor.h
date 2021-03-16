@@ -43,8 +43,23 @@ public:
      return 0;
   };
 
-
   virtual antlrcpp::Any visitDeclaration(ifccParser::DeclarationContext *ctx) override {
+    
+    string var_name(ctx->VAR()->getText());
+    
+    if (variables.count(var_name) > 0)  // have been declared before
+    {       
+      cout << "error: a variable can't be declared again ! " << endl;
+      return ERROR; 
+    }
+  
+    variables[var_name] = 1;
+    visitChildren(ctx);
+
+    return 0;
+  }
+
+  virtual antlrcpp::Any visitDefinition(ifccParser::DefinitionContext *ctx) override {
     
     string var_name(ctx->VAR()->getText());
 
@@ -68,6 +83,21 @@ public:
     return 0;
   }
 
+  virtual antlrcpp::Any visitMultiDeclaration(ifccParser::MultiDeclarationContext *ctx) override {
+    
+    string var_name(ctx->VAR()->getText());
+    
+    if (variables.count(var_name) > 0)  // have been declared before
+    {       
+      cout << "error: a variable can't be declared again ! " << endl;
+      return ERROR; 
+    }
+
+    variables[var_name] = 1;
+    
+    return 0;
+  }
+
   virtual antlrcpp::Any visitMyReturn(ifccParser::MyReturnContext *ctx) override {
 
   	string ret = "  movl  " + visit(ctx->val()).as<std::string>() + ", %eax";
@@ -87,7 +117,13 @@ public:
 
   virtual antlrcpp::Any visitGetVAR(ifccParser::GetVARContext *ctx) override {
     //cout << ctx->VAR()->getText();
-	string var_name(ctx->VAR()->getText());
+	  string var_name(ctx->VAR()->getText());
+
+    if (variables.count(var_name) == 0)  // haven't been declared before
+    {       
+      cout << "error: a variable haven't been declared ! " << endl;
+      return ERROR; 
+    }
   	
   	string var = to_string(variables[var_name]) + "(%rbp)";
   	// cout << var;

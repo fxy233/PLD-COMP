@@ -7,8 +7,13 @@ prog : 'int' 'main' '(' ')' '{' list_expr myreturn '}' ;
 
 list_expr : expr*;
 
-expr : 'int' VAR '=' val ';'  	    # declaration
+expr : 'int' VAR dec* ';'			    # declaration
+	 | 'int' VAR '=' val ';'  	        # definition
 	 ;
+
+dec : ',' VAR  					# multiDeclaration 
+	;
+
 
 
 val : CONST		# getConst
