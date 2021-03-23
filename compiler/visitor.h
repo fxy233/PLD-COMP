@@ -156,54 +156,58 @@ public:
   movl  %eax, -4(%rbp)
   */
 
-  virtual antlrcpp::Any visitMlp(ifccParser::MlpContext *ctx) override {
+  virtual antlrcpp::Any visitMlpDiv(ifccParser::MlpDivContext *ctx) override {
 
+    string op = ctx->children[1]->getText();
     string ret;
 
-    string operand1(visit(ctx->arith(0)).as<std::string>());
-    if (operand1 == "%eax") {
-    	ret = "  movl  " + operand1 + ", %edx\n";
-    	cout << ret;
-    	operand1 = "%edx";
+    if (op == "*")
+    {
+
+      string operand1(visit(ctx->arith(0)).as<std::string>());
+      if (operand1 == "%eax") {
+        ret = "  movl  " + operand1 + ", %edx\n";
+        cout << ret;
+        operand1 = "%edx";
+      }
+
+      string operand2(visit(ctx->arith(1)).as<std::string>());
+      ret = "  movl  " + operand2 + ", %eax\n";
+
+      ret = ret + "  imull  " + operand1 + ", %eax";
+
+      cout << ret << endl;
+      
+      string reg("%eax");
+
+      return reg;
+
+    } else {
+
+      cout << "  movl  %edx, %ebx\n";
+
+      string operand2(visit(ctx->arith(1)).as<std::string>());
+      if (operand2 == "%eax" || operand2.at(0) == '$') {
+        ret = "  movl  " + operand2 + ", %edx\n";
+        cout << ret;
+        operand2 = "%edx";
+      }
+
+      string operand1(visit(ctx->arith(0)).as<std::string>());
+      ret = "  movl  " + operand1 + ", %eax\n";
+      ret = ret + "  cltd\n  idivl " + operand2;
+      cout << ret << endl;
+
+      cout << "  movl  %ebx, %edx\n";
+      
+      string reg("%eax");
+
+      return reg;
+
     }
 
-    string operand2(visit(ctx->arith(1)).as<std::string>());
-    ret = "  movl  " + operand2 + ", %eax\n";
-
-    ret = ret + "  imull  " + operand1 + ", %eax";
-
-    cout << ret << endl;
-    
-    string reg("%eax");
-
-    return reg;
+    return "%eax";
   }
-
-  virtual antlrcpp::Any visitDiv(ifccParser::DivContext *ctx) override {
-
-    string ret;
-
-    cout << "  movl  %edx, %ebx\n";
-
-    string operand2(visit(ctx->arith(1)).as<std::string>());
-    if (operand2 == "%eax" || operand2.at(0) == '$') {
-    	ret = "  movl  " + operand2 + ", %edx\n";
-    	cout << ret;
-    	operand2 = "%edx";
-    }
-
-    string operand1(visit(ctx->arith(0)).as<std::string>());
-    ret = "  movl  " + operand1 + ", %eax\n";
-    ret = ret + "  cltd\n  idivl " + operand2;
-    cout << ret << endl;
-
-    cout << "  movl  %ebx, %edx\n";
-    
-    string reg("%eax");
-
-    return reg;
-  }
-
 
   virtual antlrcpp::Any visitValue(ifccParser::ValueContext *ctx) override {
       return visit(ctx->val()).as<std::string>();
@@ -223,52 +227,57 @@ public:
   movl  %eax, -4(%rbp)
 */
 
-  virtual antlrcpp::Any visitPls(ifccParser::PlsContext *ctx) override {
+  virtual antlrcpp::Any visitPlsMns(ifccParser::PlsMnsContext *ctx) override {
 
+    string op = ctx->children[1]->getText();
     string ret;
 
-    string operand1(visit(ctx->arith(0)).as<std::string>());
-    if (operand1 == "%eax") {
-    	ret = "  movl  " + operand1 + ", %edx\n";
-    	cout << ret;
-    	operand1 = "%edx";
+    if (op == "+")
+    {
+
+      string operand1(visit(ctx->arith(0)).as<std::string>());
+      if (operand1 == "%eax") {
+        ret = "  movl  " + operand1 + ", %edx\n";
+        cout << ret;
+        operand1 = "%edx";
+      }
+
+      string operand2(visit(ctx->arith(1)).as<std::string>());
+      ret = "  movl  " + operand2 + ", %eax\n";
+      ret = ret + "  addl  " + operand1 + ", %eax";
+      cout << ret << endl;
+      
+      string reg("%eax");
+
+      return reg;
+
+    } else {
+
+      string operand2(visit(ctx->arith(1)).as<std::string>());
+      if (operand2 == "%eax") {
+        ret = "  movl  " + operand2 + ", %edx\n";
+        cout << ret;
+        operand2 = "%edx";
+      }
+
+      string operand1(visit(ctx->arith(0)).as<std::string>());
+      ret = "  movl  " + operand1 + ", %eax\n";
+      ret = ret + "  subl " + operand2 + ", %eax";
+      cout << ret << endl;
+      
+      string reg("%eax");
+
+      return reg;
+
     }
-
-    string operand2(visit(ctx->arith(1)).as<std::string>());
-    ret = "  movl  " + operand2 + ", %eax\n";
-    ret = ret + "  addl  " + operand1 + ", %eax";
-    cout << ret << endl;
     
-    string reg("%eax");
-
-    return reg;
-  }
-
-  virtual antlrcpp::Any visitMns(ifccParser::MnsContext *ctx) override {
-
-    string ret;
-
-    string operand1(visit(ctx->arith(0)).as<std::string>());
-    if (operand1 == "%eax") {
-    	ret = "  movl  " + operand1 + ", %edx\n";
-    	cout << ret;
-    	operand1 = "%edx";
-    }
-
-    string operand2(visit(ctx->arith(1)).as<std::string>());
-    ret = "  movl  " + operand2 + ", %eax\n";
-    ret = ret + "  subl " + operand1 + ", %eax";
-    cout << ret << endl;
-    
-    string reg("%eax");
-
-    return reg;
+    return "%eax";
   }
 
 	
   virtual antlrcpp::Any visitPar(ifccParser::ParContext *ctx) override {
-    string ret = visit(ctx->arith()).as<std::string>();
-    return ret;
+    
+    return visit(ctx->arith()).as<string>();
   }
 
 
@@ -284,13 +293,11 @@ public:
   }
 
   virtual antlrcpp::Any visitValExpr(ifccParser::ValExprContext *ctx) override {
-    string ret = visit(ctx->val()).as<std::string>();
-    return ret;
+    return visit(ctx->val()).as<string>();
   }
 
   virtual antlrcpp::Any visitArithExpr(ifccParser::ArithExprContext *ctx) override {
-    string ret = visit(ctx->arith()).as<std::string>();
-    return ret;
+    return visit(ctx->arith()).as<string>();
   }
 
 

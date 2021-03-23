@@ -19,11 +19,9 @@ aff : val 		# valExpr
 	| arith		# arithExpr
 	;
 
-arith : arith '*' arith			# mlp
-	  | arith '/' arith 		# div
-	  | arith '+' arith			# pls
-	  | arith '-' arith 		# mns
-	  | '(' arith ')'			# par
+arith : '(' arith ')'			# par
+	  | arith ('*'|'/') arith	# mlpDiv
+	  | arith ('+'|'-') arith	# plsMns
 	  | val						# value
 	  ;
 
