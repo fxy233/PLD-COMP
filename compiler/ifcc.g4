@@ -8,13 +8,24 @@ prog : 'int' 'main' '(' ')' '{' list_expr myreturn '}' ;
 list_expr : expr*;
 
 expr : 'int' VAR dec* ';'			    # declaration
-	 | 'int' VAR '=' val ';'  	        # definition
-	 |  VAR '=' val ';'					# affectation
+	 | 'int' VAR '=' aff ';'  	        # definition
+	 |  VAR '=' aff ';'					# affectation
 	 ;
 
 dec : ',' VAR  					# multiDeclaration 
 	;
 
+aff : val 		# valExpr
+	| arith		# arithExpr
+	;
+
+arith : arith '*' arith			# mlp
+	  | arith '/' arith 		# div
+	  | arith '+' arith			# pls
+	  | arith '-' arith 		# mns
+	  | '(' arith ')'			# par
+	  | val						# value
+	  ;
 
 
 val : CONST		# getConst
