@@ -34,7 +34,6 @@ int main(int argn, const char **argv) {
   Visitor visitor;
   CheckVisitor checkVisitor;
   checkVisitor.visit(tree);
-  cout << "without errors" << endl;
   visitor.visit(tree);
 
   return 0;

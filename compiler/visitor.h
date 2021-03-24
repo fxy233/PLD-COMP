@@ -46,13 +46,6 @@ public:
   virtual antlrcpp::Any visitDeclaration(ifccParser::DeclarationContext *ctx) override {
     
     string var_name(ctx->VAR()->getText());
-    
-    if (variables.count(var_name) > 0)  // have been declared before
-    {       
-      cout << "error: a variable can't be declared again ! " << endl;
-      return ERROR; 
-    }
-  
     variables[var_name] = 1;
     visitChildren(ctx);
 
@@ -63,45 +56,28 @@ public:
     
     string var_name(ctx->VAR()->getText());
 
-    // cout << "var_name : " << var_name << endl;
-    // cout << "count : " << variables.count(var_name) << endl;
+  	cursor = cursor - 4;
+  	variables[var_name] = cursor;
 
-    if (variables.count(var_name) > 0)  // have been declared before
-  	{	  		
-  		cout << "error: a variable can't be declared again ! " << endl;
-  		return ERROR;	
-  	} else {
-  		cursor = cursor - 4;
-  		variables[var_name] = cursor;
+  	string val = visit(ctx->aff()).as<std::string>();
+   	string movl;
 
-  		string val = visit(ctx->aff()).as<std::string>();
-    	string movl;
+  	if (val.at(0) == '$' || val == "%eax")   // CONST | arith
+   	{
+      	movl = "  movl  " + val + ", " + to_string(variables[var_name]) + "(%rbp)";
+   	} else {                // VAR
+     	movl = "  movl  " + val + ", %eax\n";
+       	movl = movl + "  movl  %eax, " + to_string(variables[var_name]) + "(%rbp)";
+    }
 
-  		if (val.at(0) == '$' || val == "%eax")   // CONST | arith
-    	{
-      		movl = "  movl  " + val + ", " + to_string(variables[var_name]) + "(%rbp)";
-    	} else {                // VAR
-       		movl = "  movl  " + val + ", %eax\n";
-       		movl = movl + "  movl  %eax, " + to_string(variables[var_name]) + "(%rbp)";
-    	}
+  	cout << movl << endl;
+  	return movl;
 
-  		cout << movl << endl;
-  		return movl;
-  	}
-
-    return 0;
   }
 
   virtual antlrcpp::Any visitMultiDeclaration(ifccParser::MultiDeclarationContext *ctx) override {
     
     string var_name(ctx->VAR()->getText());
-    
-    if (variables.count(var_name) > 0)  // have been declared before
-    {       
-      cout << "error: a variable can't be declared again ! " << endl;
-      return ERROR; 
-    }
-
     variables[var_name] = 1;
     
     return 0;
@@ -110,12 +86,6 @@ public:
   virtual antlrcpp::Any visitAffectation(ifccParser::AffectationContext *ctx) override {
 
     string var_name(ctx->VAR()->getText());
-
-    if (variables.count(var_name) == 0)  // have been declared before
-    {       
-      cout << "error: a variable haven't been declared ! " << endl;
-      return ERROR; 
-    } 
 
     if (variables[var_name] == 1)
     {
@@ -140,21 +110,6 @@ public:
 
   }
 
-
-/*
-  movl  $3, -12(%rbp)
-  movl  $5, -8(%rbp)
-  movl  -12(%rbp), %eax
-  imull -8(%rbp), %eax
-
-
-  movl  $3, -12(%rbp)
-  movl  $5, -8(%rbp)
-  movl  -12(%rbp), %eax
-  cltd
-  idivl -8(%rbp)
-  movl  %eax, -4(%rbp)
-  */
 
   virtual antlrcpp::Any visitMlpDiv(ifccParser::MlpDivContext *ctx) override {
 
@@ -213,19 +168,6 @@ public:
       return visit(ctx->val()).as<std::string>();
   }
 
-  /*
-
-  movl  -12(%rbp), %edx
-  movl  -8(%rbp), %eax
-  addl  %edx, %eax
-  movl  %eax, -4(%rbp)
-
-  movl  $3, -12(%rbp)
-  movl  $5, -8(%rbp)
-  movl  -12(%rbp), %eax
-  subl  -8(%rbp), %eax
-  movl  %eax, -4(%rbp)
-*/
 
   virtual antlrcpp::Any visitPlsMns(ifccParser::PlsMnsContext *ctx) override {
 
@@ -302,26 +244,16 @@ public:
 
 
   virtual antlrcpp::Any visitGetConst(ifccParser::GetConstContext *ctx) override {
-    // cout << stoi(ctx->CONST()->getText());
-
   	string cst = "$" + ctx->CONST()->getText();
-  	// cout << cst;
 
     return cst;
   }
 
   virtual antlrcpp::Any visitGetVAR(ifccParser::GetVARContext *ctx) override {
-    //cout << ctx->VAR()->getText();
-	  string var_name(ctx->VAR()->getText());
-
-    if (variables.count(var_name) == 0)  // haven't been declared before
-    {       
-      cout << "error: a variable haven't been declared ! " << endl;
-      return ERROR; 
-    }
+	
+	string var_name(ctx->VAR()->getText());
   	
   	string var = to_string(variables[var_name]) + "(%rbp)";
-  	// cout << var;
 
     return var;
   }
