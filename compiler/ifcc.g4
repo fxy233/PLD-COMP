@@ -11,11 +11,12 @@ expr : 'int' VAR dec* ';'			    # declaration
 	 | 'int' VAR '=' aff ';'  	        # definition
 	 |  VAR '=' aff ';'					# affectation
 	 |  'putchar' '(' arith ')' ';'		# callputchar
-	 |  blockIF blockELSE?				# exprIF
+	 |  blockIF 				# exprIF
 	 ;
 
-blockIF : 'if' '(' arith ')' '{' list_expr '}' ;
-blockELSE : 'else' '{' list_expr '}' ;
+blockIF : 'if' '(' arith ')' '{' list_expr '}' blockELSE;
+blockELSE : 'else' '{' list_expr '}' 
+		  | ;
 
 dec : ',' VAR  					# multiDeclaration 
 	;

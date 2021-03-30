@@ -248,25 +248,31 @@ public:
     cout << " 	movl	" << reg << ",%eax\n";
     reg = "%eax";
     cout << "	cmpl	$0, " << reg << endl;
-    labelStack.push(label);
-    int tmp = label+1;
+    //labelStack.push(label);
+    int tmp = label;
     cout << "	je  .L" << to_string(label) << endl;
     label += 2;
     visit(ctx->list_expr());
-    cout << "	jmp  .L" << to_string(tmp) << endl;
+    cout << "	jmp  .L" << to_string(tmp+1) << endl;
+	cout << ".L" << to_string(tmp) << ":\n";
+    
+    visit(ctx->blockELSE());
+
+    cout << ".L" << to_string(tmp+1)<< ":\n";
+    
     return 0;
   }
 
-  virtual antlrcpp::Any visitBlockELSE(ifccParser::BlockELSEContext *ctx) override {
+  // virtual antlrcpp::Any visitBlockELSE(ifccParser::BlockELSEContext *ctx) override {
   	
-  	int labelNum = labelStack.top();
-  	labelStack.pop();
-    cout << ".L" << to_string(labelNum) << ":\n";
-    visit(ctx->list_expr());
-    labelNum += 1;
-    cout << ".L" << to_string(labelNum)<< ":\n";
-    return 0;
-  }
+  // 	int labelNum = labelStack.top();
+  // 	labelStack.pop();
+  //   cout << ".L" << to_string(labelNum) << ":\n";
+  //   visit(ctx->list_expr());
+  //   labelNum += 1;
+  //   cout << ".L" << to_string(labelNum)<< ":\n";
+  //   return 0;
+  // }
 
 
   virtual antlrcpp::Any visitMyReturn(ifccParser::MyReturnContext *ctx) override {
@@ -306,7 +312,7 @@ private:
   map<string, int> variables;
   int cursor = 0;
   int label = 2;
-  stack<int> labelStack;
+  //stack<int> labelStack;
   
 };
 
