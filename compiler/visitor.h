@@ -234,6 +234,8 @@ public:
     string reg( visit(ctx->arith()).as<std::string>() );
     cout << "   movl   " << reg << ",  %edi\n";
     cout << "   call   putchar@PLT\n";
+    cout << "   leave\n";
+
     return 0;
   }
 
@@ -263,16 +265,41 @@ public:
     return 0;
   }
 
-  // virtual antlrcpp::Any visitBlockELSE(ifccParser::BlockELSEContext *ctx) override {
-  	
-  // 	int labelNum = labelStack.top();
-  // 	labelStack.pop();
-  //   cout << ".L" << to_string(labelNum) << ":\n";
-  //   visit(ctx->list_expr());
-  //   labelNum += 1;
-  //   cout << ".L" << to_string(labelNum)<< ":\n";
-  //   return 0;
-  // }
+  /*
+
+jmp .L2
+
+.L3:  // while execution block
+  addl  $1, -4(%rbp)
+
+.L2:  // while condition block
+  cmpl  $9, -4(%rbp)
+  jle .L3
+
+  */
+
+
+  virtual antlrcpp::Any visitExprWHILE(ifccParser::ExprWHILEContext *ctx) override {
+    
+    int tmpLabel = label;
+    label += 2;
+    cout << "   jmp  .L" << tmpLabel << endl;
+    cout << ".L" << to_string(tmpLabel+1) << ":\n";
+
+    visit(ctx->list_expr());
+
+    cout << ".L" << to_string(tmpLabel) << ":\n";
+    
+    string reg( visit(ctx->arith()).as<std::string>() );
+    cout << "   movl  " << reg << ",%eax\n";
+    reg = "%eax";
+
+    cout << " cmpl  $0, " << reg << endl;
+    cout << " jne  .L" << to_string(tmpLabel+1) << endl;
+    
+    return 0;
+  }
+
 
 
   virtual antlrcpp::Any visitMyReturn(ifccParser::MyReturnContext *ctx) override {

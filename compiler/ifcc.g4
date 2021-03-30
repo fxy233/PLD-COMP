@@ -7,11 +7,12 @@ prog : 'int' 'main' '(' ')' '{' list_expr myreturn '}' ;
 
 list_expr : expr*;
 
-expr : 'int' VAR dec* ';'			    # declaration
-	 | 'int' VAR '=' aff ';'  	        # definition
-	 |  VAR '=' aff ';'					# affectation
-	 |  'putchar' '(' arith ')' ';'		# callputchar
-	 |  blockIF 				# exprIF
+expr : 'int' VAR dec* ';'			    				# declaration
+	 | 'int' VAR '=' aff ';'  	        				# definition
+	 |  VAR '=' aff ';'									# affectation
+	 |  'putchar' '(' arith ')' ';'						# callputchar
+	 |  blockIF 										# exprIF
+	 |  'while' '(' arith ')' '{' list_expr '}'			# exprWHILE
 	 ;
 
 blockIF : 'if' '(' arith ')' '{' list_expr '}' blockELSE;
