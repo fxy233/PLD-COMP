@@ -9,6 +9,7 @@
 #include <map>
 #include <string>
 #include <limits>
+#include <stack>
 
 #define ERROR numeric_limits<int>::min()
 
@@ -237,12 +238,35 @@ public:
   }
 
   virtual antlrcpp::Any visitCallgetchar(ifccParser::CallgetcharContext *ctx) override {
-    cout << "   movl   $0, %eax\n";
     cout << "   call   getchar@PLT\n";
     string reg("%eax");
     return reg;
   }
 
+  virtual antlrcpp::Any visitBlockIF(ifccParser::BlockIFContext *ctx) override {
+    string reg( visit(ctx->arith()).as<std::string>() );
+    cout << " 	movl	" << reg << ",%eax\n";
+    reg = "%eax";
+    cout << "	cmpl	$0, " << reg << endl;
+    labelStack.push(label);
+    int tmp = label+1;
+    cout << "	je  .L" << to_string(label) << endl;
+    label += 2;
+    visit(ctx->list_expr());
+    cout << "	jmp  .L" << to_string(tmp) << endl;
+    return 0;
+  }
+
+  virtual antlrcpp::Any visitBlockELSE(ifccParser::BlockELSEContext *ctx) override {
+  	
+  	int labelNum = labelStack.top();
+  	labelStack.pop();
+    cout << ".L" << to_string(labelNum) << ":\n";
+    visit(ctx->list_expr());
+    labelNum += 1;
+    cout << ".L" << to_string(labelNum)<< ":\n";
+    return 0;
+  }
 
 
   virtual antlrcpp::Any visitMyReturn(ifccParser::MyReturnContext *ctx) override {
@@ -281,6 +305,8 @@ private:
 
   map<string, int> variables;
   int cursor = 0;
+  int label = 2;
+  stack<int> labelStack;
   
 };
 
