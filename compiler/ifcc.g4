@@ -10,13 +10,16 @@ list_expr : expr*;
 expr : 'int' VAR dec* ';'			    # declaration
 	 | 'int' VAR '=' aff ';'  	        # definition
 	 |  VAR '=' aff ';'					# affectation
+	 |  'putchar' '(' arith ')' ';'		# callputchar
 	 ;
+
 
 dec : ',' VAR  					# multiDeclaration 
 	;
 
 aff : val 		# valExpr
 	| arith		# arithExpr
+	| 'getchar' '(' ')'   # callgetchar
 	;
 
 arith : '(' arith ')'			# par
@@ -39,3 +42,4 @@ CONST : [0-9]+ ;
 COMMENT : '/*' .*? '*/' -> skip ;
 DIRECTIVE : '#' .*? '\n' -> skip ;
 WS    : [ \t\r\n] -> channel(HIDDEN);
+

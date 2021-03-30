@@ -142,17 +142,23 @@ public:
       cout << "  movl  %edx, %ebx\n";
 
       string operand2(visit(ctx->arith(1)).as<std::string>());
-      if (operand2 == "%eax" || operand2.at(0) == '$') {
-        ret = "  movl  " + operand2 + ", %edx\n";
-        cout << ret;
-        operand2 = "%edx";
-      }
+      // if (operand2 == "%eax" || operand2.at(0) == '$') {
+      //   ret = "  movl  " + operand2 + ", %edx\n";
+      //   cout << ret;
+      //   operand2 = "%edx";
+      // }
+      cursor = cursor - 4;
+      ret = "  movl  " + operand2 + ", %edx\n";
+      ret = ret + "  movl  %edx, " + to_string(cursor) + "(%rbp)\n";
+      cout << ret;
+      operand2 = to_string(cursor) + "(%rbp)";
 
       string operand1(visit(ctx->arith(0)).as<std::string>());
       ret = "  movl  " + operand1 + ", %eax\n";
       ret = ret + "  cltd\n  idivl " + operand2;
       cout << ret << endl;
 
+      cursor = cursor + 4;
       cout << "  movl  %ebx, %edx\n";
       
       string reg("%eax");
@@ -223,6 +229,19 @@ public:
   }
 
 
+  virtual antlrcpp::Any visitCallputchar(ifccParser::CallputcharContext *ctx) override {
+    string reg( visit(ctx->arith()).as<std::string>() );
+    cout << "   movl   " << reg << ",  %edi\n";
+    cout << "   call   putchar@PLT\n";
+    return 0;
+  }
+
+  virtual antlrcpp::Any visitCallgetchar(ifccParser::CallgetcharContext *ctx) override {
+    cout << "   movl   $0, %eax\n";
+    cout << "   call   getchar@PLT\n";
+    string reg("%eax");
+    return reg;
+  }
 
 
 

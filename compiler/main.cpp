@@ -33,7 +33,7 @@ int main(int argn, const char **argv) {
 
   Visitor visitor;
   CheckVisitor checkVisitor;
-  checkVisitor.visit(tree);
+  //checkVisitor.visit(tree);
   visitor.visit(tree);
 
   return 0;
