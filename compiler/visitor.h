@@ -230,6 +230,44 @@ public:
     return visit(ctx->arith()).as<string>();
   }
 
+  virtual antlrcpp::Any visitComp(ifccParser::CompContext *ctx) override {
+    string op = ctx->children[1]->getText();
+    string ret;
+
+    string operand2(visit(ctx->arith(1)).as<std::string>());
+    ret = "  movl  " + operand2 + ", %edx\n";
+    cout << ret;
+    operand2 = "%edx";
+
+    string operand1(visit(ctx->arith(0)).as<std::string>());
+    int tmp = label;
+    label += 2;
+    cout << "  movl  " + operand1 + ", %eax\n";
+    operand1 = "%eax";
+    cout << "  cmpl  " + operand2 + ", " + operand1 << endl;
+    if (op == "==") {
+        cout << "  je   .L" << to_string(tmp) << endl;
+    } else if (op == "!=") {
+        cout << "  jne   .L" << to_string(tmp) << endl;
+    } else if (op == ">") {
+        cout << "  jg   .L" << to_string(tmp) << endl;
+    } else if (op == ">=") {
+        cout << "  jge   .L" << to_string(tmp) << endl;
+    } else if (op == "<") {
+        cout << "  jl   .L" << to_string(tmp) << endl;
+    } else if (op == "<=") {
+        cout << "  jle   .L" << to_string(tmp) << endl;
+    }
+    cout << "  movl $0, %eax\n";
+    cout << "  jmp   .L" << to_string(tmp + 1) << endl;
+    cout << ".L" << to_string(tmp) << ":" << endl;
+    cout << "  movl  $1, %eax\n";
+    cout << ".L" << to_string(tmp + 1) << ":" << endl;
+    string reg("%eax");
+    return reg;
+
+  }
+
 
   virtual antlrcpp::Any visitCallputchar(ifccParser::CallputcharContext *ctx) override {
     string reg( visit(ctx->arith()).as<std::string>() );
@@ -247,8 +285,10 @@ public:
 
   virtual antlrcpp::Any visitBlockIF(ifccParser::BlockIFContext *ctx) override {
     string reg( visit(ctx->arith()).as<std::string>() );
-    cout << " 	movl	" << reg << ",%eax\n";
-    reg = "%eax";
+    if (reg != "%eax") {
+        cout << " 	movl	" << reg << ",%eax\n";
+        reg = "%eax";
+    }
     cout << "	cmpl	$0, " << reg << endl;
     //labelStack.push(label);
     int tmp = label;
