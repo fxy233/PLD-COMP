@@ -32,14 +32,15 @@ public:
 		  // << "  movl  " << visit(ctx->val()).as<std::string>() <<", %eax\n"
     //          "  popq %rbp\n"
     //          "  ret\n";
-
     cout <<  ".globl main\n"
            	 "  main: \n"
            	 "  pushq %rbp\n"
-           	 "  movq %rsp, %rbp\n";
+           	 "  movq %rsp, %rbp\n"
+             "  subq $" << to_string((varSize+4)*4) << ", %rsp\n"; 
     visit(ctx->list_expr());
     visit(ctx->myreturn());
-	cout <<  "  popq %rbp\n"
+	cout <<    "  movq %rbp, %rsp\n"
+             "  popq %rbp\n"
              "  ret\n";
      return 0;
   };
@@ -234,7 +235,6 @@ public:
     string reg( visit(ctx->arith()).as<std::string>() );
     cout << "   movl   " << reg << ",  %edi\n";
     cout << "   call   putchar@PLT\n";
-    cout << "   leave\n";
 
     return 0;
   }
@@ -334,11 +334,16 @@ jmp .L2
     return var;
   }
 
+  void setVarSize(int size){
+      varSize = size;
+  }
+
 private:
 
   map<string, int> variables;
   int cursor = 0;
   int label = 2;
+  int varSize = 0;
   //stack<int> labelStack;
   
 };

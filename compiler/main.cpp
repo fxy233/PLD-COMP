@@ -33,7 +33,9 @@ int main(int argn, const char **argv) {
 
   Visitor visitor;
   CheckVisitor checkVisitor;
-  //checkVisitor.visit(tree);
+  checkVisitor.visit(tree);
+  int size = checkVisitor.getVarSize();
+  visitor.setVarSize(size);
   visitor.visit(tree);
 
   return 0;

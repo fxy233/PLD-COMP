@@ -112,9 +112,24 @@ public:
     return 0;
   }
 
+  virtual antlrcpp::Any visitCallputchar(ifccParser::CallputcharContext *ctx) override {
+    visit(ctx->arith());
+    return 0;
+  }
 
+  virtual antlrcpp::Any visitBlockIF(ifccParser::BlockIFContext *ctx) override {
+    visit(ctx->arith());
+    visit(ctx->list_expr());
+    visit(ctx->blockELSE());
+    return 0;
+  }
 
-
+  virtual antlrcpp::Any visitExprWHILE(ifccParser::ExprWHILEContext *ctx) override {
+    
+    visit(ctx->list_expr());
+    visit(ctx->arith());
+    return 0;
+  }
 
   virtual antlrcpp::Any visitMyReturn(ifccParser::MyReturnContext *ctx) override {
 
@@ -151,9 +166,14 @@ public:
     return 0;
   }
 
+  int getVarSize()
+  {
+    return variables.size();
+  }
+
 private:
 
   map<string, int> variables;
-  
+
 };
 
