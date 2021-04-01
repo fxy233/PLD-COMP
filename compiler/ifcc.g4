@@ -31,6 +31,7 @@ arith : '(' arith ')'			# par
 	  | arith ('*'|'/') arith	# mlpDiv
 	  | arith ('+'|'-') arith	# plsMns
 	  | val						# value
+	  | arith ('=='|'!='|'>'|'>='|'<'|'<=') arith  # comp
 	  ;
 
 
