@@ -112,6 +112,14 @@ public:
     return 0;
   }
 
+  virtual antlrcpp::Any visitComp(ifccParser::CompContext *ctx) override {
+    visit(ctx->arith(1));
+    visit(ctx->arith(0));
+    
+    return 0;
+
+  }
+
   virtual antlrcpp::Any visitCallputchar(ifccParser::CallputcharContext *ctx) override {
     visit(ctx->arith());
     return 0;
@@ -128,6 +136,93 @@ public:
     
     visit(ctx->list_expr());
     visit(ctx->arith());
+    return 0;
+  }
+
+  virtual antlrcpp::Any visitExprFOR(ifccParser::ExprFORContext *ctx) override {
+
+    visit(ctx->condIF1());
+    visit(ctx->list_expr());
+    visit(ctx->condIF3());
+    visit(ctx->arith());
+    return 0;
+  }
+
+  virtual antlrcpp::Any visitIfConditionDef(ifccParser::IfConditionDefContext *ctx) override {
+    string var_name(ctx->VAR()->getText());
+
+    if (variables.count(var_name) > 0)  // have been declared before
+    {       
+      cout << "error: the variable " << var_name << " can't be declared again ! " << endl;
+      exit(0); 
+    } else {
+      visit(ctx->aff());
+      variables[var_name] = 1;
+    }
+    return 0;
+  }
+
+  virtual antlrcpp::Any visitIfConditionAff(ifccParser::IfConditionAffContext *ctx) override {
+    string var_name(ctx->VAR()->getText());
+
+    if (variables.count(var_name) == 0)  // have been declared before
+    {       
+      cout << "error: the variable " << var_name << " haven't been declared ! " << endl;
+      exit(0); 
+    } 
+
+    visit(ctx->aff());
+    variables[var_name] = 1;
+
+    return 0;
+
+  }
+
+  virtual antlrcpp::Any visitAdditionLeft(ifccParser::AdditionLeftContext *ctx) override {
+    string var_name(ctx->VAR()->getText());
+
+    if (variables.count(var_name) == 0)  // have been declared before
+    {       
+      cout << "error: the variable " << var_name << " haven't been declared ! " << endl;
+      exit(0); 
+    } 
+
+    return 0;
+  }
+
+  virtual antlrcpp::Any visitAdditionRight(ifccParser::AdditionRightContext *ctx) override {
+    string var_name(ctx->VAR()->getText());
+
+    if (variables.count(var_name) == 0)  // have been declared before
+    {       
+      cout << "error: the variable " << var_name << " haven't been declared ! " << endl;
+      exit(0); 
+    } 
+
+    return 0;
+  }
+
+  virtual antlrcpp::Any visitSubLeft(ifccParser::SubLeftContext *ctx) override {
+    string var_name(ctx->VAR()->getText());
+
+    if (variables.count(var_name) == 0)  // have been declared before
+    {       
+      cout << "error: the variable " << var_name << " haven't been declared ! " << endl;
+      exit(0); 
+    } 
+
+    return 0;
+  }
+
+  virtual antlrcpp::Any visitSubRight(ifccParser::SubRightContext *ctx) override {
+    string var_name(ctx->VAR()->getText());
+
+    if (variables.count(var_name) == 0)  // have been declared before
+    {       
+      cout << "error: the variable " << var_name << " haven't been declared ! " << endl;
+      exit(0); 
+    } 
+
     return 0;
   }
 

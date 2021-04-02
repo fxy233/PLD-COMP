@@ -39,7 +39,7 @@ public:
              "  subq $" << to_string((varSize+4)*4) << ", %rsp\n"; 
     visit(ctx->list_expr());
     visit(ctx->myreturn());
-	cout <<    "  movq %rbp, %rsp\n"
+	  cout <<  "  movq %rbp, %rsp\n"
              "  popq %rbp\n"
              "  ret\n";
      return 0;
@@ -305,19 +305,6 @@ public:
     return 0;
   }
 
-  /*
-
-jmp .L2
-
-.L3:  // while execution block
-  addl  $1, -4(%rbp)
-
-.L2:  // while condition block
-  cmpl  $9, -4(%rbp)
-  jle .L3
-
-  */
-
 
   virtual antlrcpp::Any visitExprWHILE(ifccParser::ExprWHILEContext *ctx) override {
     
@@ -340,6 +327,101 @@ jmp .L2
     return 0;
   }
 
+  virtual antlrcpp::Any visitExprFOR(ifccParser::ExprFORContext *ctx) override {
+
+    visit(ctx->condIF1());
+    int tmpLabel = label;
+    label += 2;
+    cout << "   jmp  .L" << tmpLabel << endl;
+
+    cout << ".L" << to_string(tmpLabel+1) << ":\n";
+    visit(ctx->list_expr());
+    visit(ctx->condIF3());
+
+    cout << ".L" << tmpLabel << ":\n";
+    string reg( visit(ctx->arith()).as<std::string>() );
+    cout << "   movl  " << reg << ",%eax\n";
+    reg = "%eax";
+    cout << " cmpl  $0, " << reg << endl;
+    cout << " jne  .L" << to_string(tmpLabel+1) << endl;
+
+    return 0;
+  }
+
+  virtual antlrcpp::Any visitIfConditionDef(ifccParser::IfConditionDefContext *ctx) override {
+    string var_name(ctx->VAR()->getText());
+
+    cursor = cursor - 4;
+    variables[var_name] = cursor;
+
+    string val = visit(ctx->aff()).as<std::string>();
+    string movl;
+
+    if (val.at(0) == '$' || val == "%eax")   // CONST | arith
+    {
+        movl = "  movl  " + val + ", " + to_string(variables[var_name]) + "(%rbp)";
+    } else {                // VAR
+      movl = "  movl  " + val + ", %eax\n";
+        movl = movl + "  movl  %eax, " + to_string(variables[var_name]) + "(%rbp)";
+    }
+
+    cout << movl << endl;
+    return movl;
+  }
+
+  virtual antlrcpp::Any visitIfConditionAff(ifccParser::IfConditionAffContext *ctx) override {
+    string var_name(ctx->VAR()->getText());
+
+    if (variables[var_name] == 1)
+    {
+      cursor = cursor - 4;
+      variables[var_name] = cursor;
+    }
+
+
+    string val = visit(ctx->aff()).as<std::string>();
+    string movl;
+    
+    if (val.at(0) == '$' || val == "%eax")   // CONST | arith
+    {
+       movl = "  movl  " + val + ", " + to_string(variables[var_name]) + "(%rbp)";
+    } else {                // VAR
+       movl = "  movl  " + val + ", %eax\n";
+       movl = movl + "  movl  %eax, " + to_string(variables[var_name]) + "(%rbp)";
+    }
+
+    cout << movl << endl;
+    return movl;
+
+  }
+
+  virtual antlrcpp::Any visitAdditionLeft(ifccParser::AdditionLeftContext *ctx) override {
+    string var_name(ctx->VAR()->getText());
+    string ret = "  addl  $1, " + to_string(variables[var_name]) + "(%rbp)";
+    cout << ret << endl;
+    return 0;
+  }
+
+  virtual antlrcpp::Any visitAdditionRight(ifccParser::AdditionRightContext *ctx) override {
+    string var_name(ctx->VAR()->getText());
+    string ret = "  addl  $1, " + to_string(variables[var_name]) + "(%rbp)";
+    cout << ret << endl;
+    return 0;
+  }
+
+  virtual antlrcpp::Any visitSubLeft(ifccParser::SubLeftContext *ctx) override {
+    string var_name(ctx->VAR()->getText());
+    string ret = "  subl  $1, " + to_string(variables[var_name]) + "(%rbp)";
+    cout << ret << endl;
+    return 0;
+  }
+
+  virtual antlrcpp::Any visitSubRight(ifccParser::SubRightContext *ctx) override {
+    string var_name(ctx->VAR()->getText());
+    string ret = "  subl  $1, " + to_string(variables[var_name]) + "(%rbp)";
+    cout << ret << endl;
+    return 0;
+  }
 
 
   virtual antlrcpp::Any visitMyReturn(ifccParser::MyReturnContext *ctx) override {

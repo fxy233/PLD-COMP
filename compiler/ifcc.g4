@@ -13,7 +13,20 @@ expr : 'int' VAR dec* ';'			    				# declaration
 	 |  'putchar' '(' arith ')' ';'						# callputchar
 	 |  blockIF 										# exprIF
 	 |  'while' '(' arith ')' '{' list_expr '}'			# exprWHILE
+	 |  'for' '(' condIF1 ';' arith ';' condIF3 ')' '{' list_expr '}'	# exprFOR
 	 ;
+
+condIF1 : 'int' VAR '=' aff  	        			# ifConditionDef
+		|  VAR '=' aff								# ifConditionAff
+		|  # nothing2
+		;
+
+condIF3 : '++' VAR 		# additionLeft
+		| VAR '++'		# additionRight
+		| '--' VAR 		# subLeft
+		| VAR '--'  	# subRight
+		| # nothing
+		;				
 
 blockIF : 'if' '(' arith ')' '{' list_expr '}' blockELSE;
 blockELSE : 'else' '{' list_expr '}' 
