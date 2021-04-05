@@ -22,76 +22,298 @@ class  CheckVisitor : public ifccBaseVisitor {
 public:
 
   virtual antlrcpp::Any visitProg(ifccParser::ProgContext *ctx) override {
-      visit(ctx->list_expr());
+      visit(ctx->list_instr());
       visit(ctx->myreturn());
       return 0;
   };
 
-  virtual antlrcpp::Any visitDeclaration(ifccParser::DeclarationContext *ctx) override {
+
+  virtual antlrcpp::Any visitDecal(ifccParser::DecalContext *ctx) override {
     
-    string var_name(ctx->VAR()->getText());
-    
-    if (variables.count(var_name) > 0)  // have been declared before
-    {       
-      cout << "error: the variable " << var_name << " can't be declared again ! " << endl;
-      exit(0); 
+    string var_type(ctx->type()->getText());
+
+    if (var_type == "int") 
+    {
+        typeSize = 4;
+    } else if (var_type == "char") 
+    {     
+        typeSize = 1;
+    } else if (var_type == "long") 
+    {
+        typeSize = 8;
     }
-  
-    variables[var_name] = 0;
+
     visitChildren(ctx);
+
+    typeSize = 0;
+
     return 0;
   }
 
-  virtual antlrcpp::Any visitDefinition(ifccParser::DefinitionContext *ctx) override {
-    
-    string var_name(ctx->VAR()->getText());
-
-    if (variables.count(var_name) > 0)  // have been declared before
-  	{	  		
-      cout << "error: the variable " << var_name << " can't be declared again ! " << endl;
-      exit(0); 
-  	} else {
-  		visit(ctx->aff());
-  		variables[var_name] = 1;
-  	}
-    return 0;
-  }
-
-  virtual antlrcpp::Any visitMultiDeclaration(ifccParser::MultiDeclarationContext *ctx) override {
-    
-    string var_name(ctx->VAR()->getText());
-    
-    if (variables.count(var_name) > 0)  // have been declared before
+  void checkDoubleDec(string var_name)
+  {
+    if (variables.count(var_name) > 0) 
     {       
       cout << "error: the variable " << var_name << " can't be declared again ! " << endl;
       exit(0); 
     }
-    variables[var_name] = 0;
-    return 0;
   }
 
-  virtual antlrcpp::Any visitAffectation(ifccParser::AffectationContext *ctx) override {
+  void checkAffWithoutDec(string var_name)
+  {
+      if (variables.count(var_name) == 0)
+      {       
+          cout << "error: the variable " << var_name << " haven't been declared ! " << endl;
+          exit(0); 
+      }
+  }
 
-    string var_name(ctx->VAR()->getText());
-
-    if (variables.count(var_name) == 0)  // have been declared before
+  void checkInitial(string var_name)
+  {
+    if (variables.count(var_name) == 0)
     {       
       cout << "error: the variable " << var_name << " haven't been declared ! " << endl;
       exit(0); 
+    } else
+    {
+      if (variables[var_name] == 0)
+      {
+        cout << "error: the variable " << var_name << " haven't been initialized ! " << endl;
+        exit(0); 
+      }
+    }
+  }
+
+
+  virtual antlrcpp::Any visitDec1(ifccParser::Dec1Context *ctx) override {
+    
+    string var_name(ctx->VAR()->getText());
+
+    checkDoubleDec(var_name);
+
+    variables[var_name] = 0;
+    variables_size[var_name] = typeSize;
+    
+    return 0;
+  }
+
+  virtual antlrcpp::Any visitDec2(ifccParser::Dec2Context *ctx) override {
+    
+    string var_name(ctx->VAR()->getText());
+
+    checkDoubleDec(var_name);
+
+    variables[var_name] = 0;
+    variables_size[var_name] = typeSize;
+    
+    return 0;
+  }
+
+  virtual antlrcpp::Any visitAff1(ifccParser::Aff1Context *ctx) override {
+    
+    int size = ctx->children.size();
+
+    visit(ctx->children[size-1]);  
+
+    for (size = size-3; size >=0; size=size-2)
+    {
+      string var_name(ctx->children[size]->getText());
+
+      if (typeSize != 0)
+      {
+        checkDoubleDec(var_name);
+        variables[var_name] = 0;
+        variables_size[var_name] = typeSize;
+      }
+
+      checkAffWithoutDec(var_name);
+      
+      variables[var_name] = 1;
+    }
+
+    return 0;
+  }
+
+  virtual antlrcpp::Any visitAff2(ifccParser::Aff2Context *ctx) override {
+
+    int size = ctx->children.size();
+
+    visit(ctx->children[size-1]);
+
+    for (size = size-3; size >=0; size=size-2)
+    {
+      string var_name(ctx->children[size]->getText());
+
+      if (typeSize != 0)
+      {
+        checkDoubleDec(var_name);
+        variables[var_name] = 0;
+        variables_size[var_name] = typeSize;
+      }
+
+      checkAffWithoutDec(var_name);
+      
+      variables[var_name] = 1;
+    }
+    
+    return 0;
+  }
+
+  virtual antlrcpp::Any visitExpr(ifccParser::ExprContext *ctx) override {
+    
+    visit(ctx->rval());
+
+    if (ctx->VAR() != NULL)
+    { 
+      string var_name(ctx->VAR()->getText());
+
+      if (typeSize != 0)
+      {
+        checkDoubleDec(var_name);
+        variables[var_name] = 0;
+        variables_size[var_name] = typeSize;
+      }
+
+      checkAffWithoutDec(var_name);
+      variables[var_name] = 1;
+    }
+    return 0;
+  }
+
+  virtual antlrcpp::Any visitCallputchar(ifccParser::CallputcharContext *ctx) override {
+    visit(ctx->rval());
+    return 0;
+  }
+
+  virtual antlrcpp::Any visitExprWHILE(ifccParser::ExprWHILEContext *ctx) override {
+    
+    visit(ctx->list_instr());
+    visit(ctx->rval());
+
+    return 0;
+  }
+
+  virtual antlrcpp::Any visitExprFOR(ifccParser::ExprFORContext *ctx) override {
+
+    if (ctx->condFOR1() != NULL)
+    {
+      visit(ctx->condFOR1());
+    }
+
+    visit(ctx->list_instr());
+
+    if (ctx->condFOR2() != NULL)
+    {
+      visit(ctx->condFOR2());
+    }
+
+    visit(ctx->rval());
+
+    return 0;
+  }
+
+  virtual antlrcpp::Any visitCondWithDec(ifccParser::CondWithDecContext *ctx) override {
+    
+    string var_type(ctx->type()->getText());
+
+    if (var_type == "int") 
+    {
+        typeSize = 4;
+    } else if (var_type == "char") 
+    {     
+        typeSize = 1;
+    } else if (var_type == "long") 
+    {
+        typeSize = 8;
+    }
+
+    string var_name(ctx->VAR()->getText());
+
+    checkDoubleDec(var_name);
+    
+    variables[var_name] = 0;
+    variables_size[var_name] = typeSize;
+    
+    if (ctx->rval() != NULL)
+    {
+
+      visit(ctx->rval());  
+      if (variables[var_name]  == 0) 
+      {
+        variables[var_name] = 1;
+      }
+
     } 
 
-    visit(ctx->aff());
-    variables[var_name] = 1;
+    if ( ctx->listExpr() != NULL)
+    {
+      visit(ctx->listExpr());
+    }
+
+    typeSize = 0;
 
     return 0;
 
+  }
+
+  virtual antlrcpp::Any visitBlockIF(ifccParser::BlockIFContext *ctx) override {
+    visit(ctx->rval());
+    visit(ctx->list_instr());
+    if (ctx->blockELSE() != NULL) 
+    {
+      visit(ctx->blockELSE());
+    }
+    return 0;
+  }
+
+  virtual antlrcpp::Any visitAdditionLeft(ifccParser::AdditionLeftContext *ctx) override {
+    string var_name(ctx->VAR()->getText());
+
+    checkInitial(var_name);
+
+    return 0;
+  }
+
+  virtual antlrcpp::Any visitAdditionRight(ifccParser::AdditionRightContext *ctx) override {
+    string var_name(ctx->VAR()->getText());
+
+    checkInitial(var_name);
+
+    return 0;
+  }
+
+  virtual antlrcpp::Any visitSubLeft(ifccParser::SubLeftContext *ctx) override {
+    string var_name(ctx->VAR()->getText());
+
+    checkInitial(var_name);
+
+    return 0;
+  }
+
+  virtual antlrcpp::Any visitSubRight(ifccParser::SubRightContext *ctx) override {
+    string var_name(ctx->VAR()->getText());
+
+    checkInitial(var_name);
+
+    return 0;
+  }
+
+  virtual antlrcpp::Any visitPar(ifccParser::ParContext *ctx) override {
+    visitChildren(ctx);
+    return 0;
   }
 
 
   virtual antlrcpp::Any visitMlpDiv(ifccParser::MlpDivContext *ctx) override {
 
-    visit(ctx->arith(0));
-    visit(ctx->arith(1));
+    visit(ctx->rval(0));
+    visit(ctx->rval(1));
+    return 0;
+  }
+
+  virtual antlrcpp::Any visitPlsMns(ifccParser::PlsMnsContext *ctx) override {
+    visit(ctx->rval(0));
+    visit(ctx->rval(1));
     return 0;
   }
 
@@ -100,175 +322,47 @@ public:
       return 0;
   }
 
-  virtual antlrcpp::Any visitPlsMns(ifccParser::PlsMnsContext *ctx) override {
-    visit(ctx->arith(0));
-    visit(ctx->arith(1));
-    return 0;
-  }
-
-	
-  virtual antlrcpp::Any visitPar(ifccParser::ParContext *ctx) override {
-    visit(ctx->arith());
-    return 0;
-  }
-
   virtual antlrcpp::Any visitComp(ifccParser::CompContext *ctx) override {
-    visit(ctx->arith(1));
-    visit(ctx->arith(0));
+    visit(ctx->rval(1));
+    visit(ctx->rval(0));
     
     return 0;
 
   }
 
-  virtual antlrcpp::Any visitCallputchar(ifccParser::CallputcharContext *ctx) override {
-    visit(ctx->arith());
-    return 0;
-  }
-
-  virtual antlrcpp::Any visitBlockIF(ifccParser::BlockIFContext *ctx) override {
-    visit(ctx->arith());
-    visit(ctx->list_expr());
-    visit(ctx->blockELSE());
-    return 0;
-  }
-
-  virtual antlrcpp::Any visitExprWHILE(ifccParser::ExprWHILEContext *ctx) override {
-    
-    visit(ctx->list_expr());
-    visit(ctx->arith());
-    return 0;
-  }
-
-  virtual antlrcpp::Any visitExprFOR(ifccParser::ExprFORContext *ctx) override {
-
-    visit(ctx->condIF1());
-    visit(ctx->list_expr());
-    visit(ctx->condIF3());
-    visit(ctx->arith());
-    return 0;
-  }
-
-  virtual antlrcpp::Any visitIfConditionDef(ifccParser::IfConditionDefContext *ctx) override {
+  virtual antlrcpp::Any visitGetVAR(ifccParser::GetVARContext *ctx) override {
     string var_name(ctx->VAR()->getText());
 
-    if (variables.count(var_name) > 0)  // have been declared before
-    {       
-      cout << "error: the variable " << var_name << " can't be declared again ! " << endl;
-      exit(0); 
-    } else {
-      visit(ctx->aff());
-      variables[var_name] = 1;
-    }
-    return 0;
-  }
-
-  virtual antlrcpp::Any visitIfConditionAff(ifccParser::IfConditionAffContext *ctx) override {
-    string var_name(ctx->VAR()->getText());
-
-    if (variables.count(var_name) == 0)  // have been declared before
-    {       
-      cout << "error: the variable " << var_name << " haven't been declared ! " << endl;
-      exit(0); 
-    } 
-
-    visit(ctx->aff());
-    variables[var_name] = 1;
-
-    return 0;
-
-  }
-
-  virtual antlrcpp::Any visitAdditionLeft(ifccParser::AdditionLeftContext *ctx) override {
-    string var_name(ctx->VAR()->getText());
-
-    if (variables.count(var_name) == 0)  // have been declared before
-    {       
-      cout << "error: the variable " << var_name << " haven't been declared ! " << endl;
-      exit(0); 
-    } 
+    checkInitial(var_name);
 
     return 0;
   }
-
-  virtual antlrcpp::Any visitAdditionRight(ifccParser::AdditionRightContext *ctx) override {
-    string var_name(ctx->VAR()->getText());
-
-    if (variables.count(var_name) == 0)  // have been declared before
-    {       
-      cout << "error: the variable " << var_name << " haven't been declared ! " << endl;
-      exit(0); 
-    } 
-
-    return 0;
-  }
-
-  virtual antlrcpp::Any visitSubLeft(ifccParser::SubLeftContext *ctx) override {
-    string var_name(ctx->VAR()->getText());
-
-    if (variables.count(var_name) == 0)  // have been declared before
-    {       
-      cout << "error: the variable " << var_name << " haven't been declared ! " << endl;
-      exit(0); 
-    } 
-
-    return 0;
-  }
-
-  virtual antlrcpp::Any visitSubRight(ifccParser::SubRightContext *ctx) override {
-    string var_name(ctx->VAR()->getText());
-
-    if (variables.count(var_name) == 0)  // have been declared before
-    {       
-      cout << "error: the variable " << var_name << " haven't been declared ! " << endl;
-      exit(0); 
-    } 
-
-    return 0;
-  }
-
+  
   virtual antlrcpp::Any visitMyReturn(ifccParser::MyReturnContext *ctx) override {
 
   	visit(ctx->val());
     return 0;
   }
 
-  virtual antlrcpp::Any visitValExpr(ifccParser::ValExprContext *ctx) override {
-    visit(ctx->val());
-    return 0;
-  }
-
-  virtual antlrcpp::Any visitArithExpr(ifccParser::ArithExprContext *ctx) override {
-    visit(ctx->arith());
-    return 0;
-  }
-
-
-  virtual antlrcpp::Any visitGetVAR(ifccParser::GetVARContext *ctx) override {
-	  string var_name(ctx->VAR()->getText());
-
-    if (variables.count(var_name) == 0)  // haven't been declared before
-    {       
-      cout << "error: the variable " << var_name << " hasn't been declared ! " << endl;
-      exit(0); 
-    }
-
-    if (variables[var_name] == 0)  
-    {       
-      cout << "error: the variable " << var_name << " hasn't been initialized ! " << endl;
-      exit(0); 
-    }
-
-    return 0;
-  }
-
   int getVarSize()
   {
-    return variables.size();
+    int size = 0;
+    map<string, int>::iterator iter;
+    iter = variables_size.begin();
+    while(iter != variables_size.end()) {
+      size += iter->second;
+      iter++;
+
+    }
+    return size;
   }
 
 private:
 
   map<string, int> variables;
+  map<string, int> variables_size;
+
+  int typeSize = 0;
 
 };
 
