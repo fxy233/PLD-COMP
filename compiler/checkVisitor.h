@@ -81,6 +81,7 @@ public:
     }
   }
 
+/*
   void checkSegment(string var_name, int index)
   {
     if (index*tab_size[var_name] > tab[var_name] || index < 0)
@@ -89,19 +90,20 @@ public:
       exit(0); 
     }
   }
+*/
 
-  void checkTabInit(string var_name, int index)
+  void checkTabInit(string var_name)
   {
     if (variables.count(var_name) == 0)
     {       
       cout << "error: the variable " << var_name << " have not been declared ! " << endl;
       exit(0); 
     } 
-    if (find(tab_init[var_name].begin(), tab_init[var_name].end(), index) == tab_init[var_name].end())
-    {
-        cout << "error: the index " << index << " have not been initialized ! " << endl;
-        exit(0); 
-    }
+    // if (find(tab_init[var_name].begin(), tab_init[var_name].end(), index) == tab_init[var_name].end())
+    // {
+    //     cout << "error: the index " << index << " have not been initialized ! " << endl;
+    //     exit(0); 
+    // }
   }
 
 
@@ -205,37 +207,47 @@ public:
 
   virtual antlrcpp::Any visitExpr(ifccParser::ExprContext *ctx) override {
     
-    visit(ctx->rval());
+    
 
-    if (ctx->CONST() != NULL)
+    if (ctx->children.size() > 4)
     {
+      
       string tab_name(ctx->VAR()->getText());
-      string i(ctx->CONST()->getText());
+      visit(ctx->children[2]);
+      visit(ctx->children[5]);
+      //string i(ctx->CONST()->getText());
 
-      int index = stoi(i);
+      //int index = stoi(i);
 
-      checkSegment(tab_name, index);
+      //checkSegment(tab_name, index);
 
-      tab_init[tab_name].push_back(index);
+      //tab_init[tab_name].push_back(index);
 
       return 0;
-    } 
+    } else 
+    {
+      
+      if (ctx->VAR() != NULL)
+      { 
+        visit(ctx->children[2]);
+        string var_name(ctx->VAR()->getText());
 
-    if (ctx->VAR() != NULL)
-    { 
-      string var_name(ctx->VAR()->getText());
+        if (typeSize != 0)
+        {
+          checkDoubleDec(var_name);
+          variables[var_name] = 0;
+          variables_size[var_name] = typeSize;
+        }
 
-      if (typeSize != 0)
+        checkAffWithoutDec(var_name);
+        variables[var_name] = 1;
+      }else
       {
-        checkDoubleDec(var_name);
-        variables[var_name] = 0;
-        variables_size[var_name] = typeSize;
+        visit(ctx->children[0]);
       }
-
-      checkAffWithoutDec(var_name);
-      variables[var_name] = 1;
+      return 0;
     }
-    return 0;
+    
   }
 
   virtual antlrcpp::Any visitCallputchar(ifccParser::CallputcharContext *ctx) override {
@@ -322,17 +334,20 @@ public:
   }
 
   virtual antlrcpp::Any visitAdditionLeft(ifccParser::AdditionLeftContext *ctx) override {
-    string var_name(ctx->VAR()->getText());
+    
 
-    if (ctx->CONST() == NULL)
+    if (ctx->children.size() < 3)
     {
+      string var_name(ctx->children[1]->getText());
       checkInitial(var_name);
     } else {
-      string i(ctx->CONST()->getText());
-      int index = stoi(i);
+      string var_name(ctx->children[1]->getText());
+      //string i(ctx->CONST()->getText());
+      //int index = stoi(i);
 
-      checkSegment(var_name, index);
-      checkTabInit(var_name, index);
+      //checkSegment(var_name, index);
+      visit(ctx->children[3]);
+      checkTabInit(var_name);
     }
 
 
@@ -340,50 +355,56 @@ public:
   }
 
   virtual antlrcpp::Any visitAdditionRight(ifccParser::AdditionRightContext *ctx) override {
-    string var_name(ctx->VAR()->getText());
 
-    if (ctx->CONST() == NULL)
+    if (ctx->children.size() < 3)
     {
+      string var_name(ctx->children[0]->getText());
       checkInitial(var_name);
     } else {
-      string i(ctx->CONST()->getText());
-      int index = stoi(i);
+      string var_name(ctx->children[0]->getText());
+      // string i(ctx->CONST()->getText());
+      // int index = stoi(i);
 
-      checkSegment(var_name, index);
-      checkTabInit(var_name, index);
+      // checkSegment(var_name, index);
+      visit(ctx->children[2]);
+      checkTabInit(var_name);
     }
     return 0;
   }
 
   virtual antlrcpp::Any visitSubLeft(ifccParser::SubLeftContext *ctx) override {
-    string var_name(ctx->VAR()->getText());
 
-    if (ctx->CONST() == NULL)
+    if (ctx->children.size() < 3)
     {
+      string var_name(ctx->children[1]->getText());
       checkInitial(var_name);
     } else {
-      string i(ctx->CONST()->getText());
-      int index = stoi(i);
+      string var_name(ctx->children[1]->getText());
+      // string i(ctx->CONST()->getText());
+      // int index = stoi(i);
 
-      checkSegment(var_name, index);
-      checkTabInit(var_name, index);
+      // checkSegment(var_name, index);
+      visit(ctx->children[3]);
+      checkTabInit(var_name);
     }
 
     return 0;
   }
 
   virtual antlrcpp::Any visitSubRight(ifccParser::SubRightContext *ctx) override {
-    string var_name(ctx->VAR()->getText());
 
-    if (ctx->CONST() == NULL)
+    if (ctx->children.size() < 3)
     {
+      string var_name(ctx->children[0]->getText());
       checkInitial(var_name);
     } else {
-      string i(ctx->CONST()->getText());
-      int index = stoi(i);
+      string var_name(ctx->children[0]->getText());
+      // string i(ctx->CONST()->getText());
+      // int index = stoi(i);
 
-      checkSegment(var_name, index);
-      checkTabInit(var_name, index);
+      // checkSegment(var_name, index);
+      visit(ctx->children[2]);
+      checkTabInit(var_name);
     }
 
     return 0;
@@ -438,12 +459,9 @@ public:
   virtual antlrcpp::Any visitGetTab(ifccParser::GetTabContext *ctx) override {
 
     string var_name(ctx->VAR()->getText());
-    string i(ctx->CONST()->getText());
-
-    int index = stoi(i);
+    visit(ctx->rval());
     
-    checkSegment(var_name, index);
-    checkTabInit(var_name, index);
+    checkTabInit(var_name);
 
     return 0;
   }

@@ -208,21 +208,22 @@ public:
   */
 
   virtual antlrcpp::Any visitExpr(ifccParser::ExprContext *ctx) override {
-  	string val = visit(ctx->rval()).as<std::string>();
 
     //cout << "val expression : " << val << endl; 
 
-  	if (ctx->CONST() != NULL)
-  	{
-		string tab_name(ctx->VAR()->getText());
-  		string i(ctx->CONST()->getText());
+  	if (ctx->children.size() > 4)  // array
+  	{ 
+		  string tab_name(ctx->VAR()->getText());
+  		string index_reg(visit(ctx->children[2]).as<std::string>());
 
-  		int index = stoi(i);
-  		index = index * variables_size[tab_name];
+      cout << "   movl  " << index_reg << ", %eax\n";
+      cout << "   cltq  " << endl;
+      cout << "   leaq  0(,%rax,4), %rcx" << endl;
+      cout << "   leaq  " << tab_name << "(%rip), %rdx\n";
 
-  		string str_index = index == 0 ? "" :to_string(index)+"+";
-  		string var = str_index + tab_name + "(%rip)";
-
+  		string var = "(%rcx, %rdx)";
+      
+      string val = visit(ctx->children[5]).as<std::string>();
   		string movl;
     	movl = "  movl  " + val + ", %eax\n";
 	    movl = movl + "  movl  %eax, " + var;
@@ -230,32 +231,37 @@ public:
 
 	    string reg("%eax");
   		return reg;
-  	}	
-
-  	if (ctx->VAR() != NULL)
-  	{	
-  		string var_name(ctx->VAR()->getText());
-  		if (typeSize != 0) 
-  		{
-  			variables[var_name] = 0;
-    		variables_size[var_name] = typeSize;
-  		}
-  		if (variables[var_name]  == 0) 
-    	{
-    		cursor = cursor - variables_size[var_name];
-    		variables[var_name] = cursor;
-    	}
-  		string movl;
-    	movl = "  movl  " + val + ", %eax\n";
-	    movl = movl + "  movl  %eax, " + to_string(variables[var_name]) + "(%rbp)";
-	    cout << movl << endl;
-  	} else {
-      string movl;
-      movl = "  movl  " + val + ", %eax\n";
-      cout << movl;
+  	}	else
+    {
+      if (ctx->VAR() != NULL)
+      { 
+        string val = visit(ctx->children[2]).as<std::string>();
+        string var_name(ctx->VAR()->getText());
+        if (typeSize != 0) 
+        {
+          variables[var_name] = 0;
+          variables_size[var_name] = typeSize;
+        }
+        if (variables[var_name]  == 0) 
+        {
+          cursor = cursor - variables_size[var_name];
+          variables[var_name] = cursor;
+        }
+        string movl;
+        movl = "  movl  " + val + ", %eax\n";
+        movl = movl + "  movl  %eax, " + to_string(variables[var_name]) + "(%rbp)";
+        cout << movl << endl;
+      } else {
+        string val = visit(ctx->children[0]).as<std::string>();
+        string movl;
+        movl = "  movl  " + val + ", %eax\n";
+        cout << movl;
+      }
+      string reg("%eax");
+      return reg;
     }
-  	string reg("%eax");
-  	return reg;
+
+  	
   }
 
   /*
@@ -425,7 +431,7 @@ public:
     label += 2;
     visit(ctx->list_instr());
     cout << "	jmp  .L" << to_string(tmp+1) << endl;
-	cout << ".L" << to_string(tmp) << ":\n";
+	  cout << ".L" << to_string(tmp) << ":\n";
     
     if (ctx->blockELSE() != NULL) 
     {
@@ -442,28 +448,33 @@ public:
   */
 
   virtual antlrcpp::Any visitAdditionLeft(ifccParser::AdditionLeftContext *ctx) override {
-    string var_name(ctx->VAR()->getText());
     string reg = "";
 
-    if (ctx->CONST() == NULL)
+    if (ctx->children.size() < 3)   
     {
+      string var_name(ctx->children[1]->getText());
     	reg = to_string(variables[var_name]) + "(%rbp)";
-    } else {
-	  	string i(ctx->CONST()->getText());
+    } else {                        // array
+      string var_name(ctx->children[1]->getText());
+      string index_reg(visit(ctx->children[3]).as<std::string>());
 
-	  	int index = stoi(i);
-	  	index = index * variables_size[var_name];
+      cout << "   movl  " << index_reg << ", %eax\n";
+      cout << "   cltq  " << endl;
+      cout << "   leaq  0(,%rax,4), %rcx" << endl;
+      cout << "   leaq  " << var_name << "(%rip), %rdx\n";
 
-	  	string str_index = index == 0 ? "" :to_string(index)+"+";
-	  	reg = str_index + var_name + "(%rip)";
+      reg = "(%rcx, %rdx)";
+
     }
 
+/*
     if (variables_size[var_name] == 1)
     {
       cout << "  movsbl  " << reg << ", %eax\n";
     } else {
       cout << "  movl  " << reg << ", %eax\n";
     }
+*/
 
     cout << "  addl  $1, " << reg << endl;
     cout << "  movl  " << reg << ", %eax\n";
@@ -474,28 +485,31 @@ public:
   }
 
   virtual antlrcpp::Any visitAdditionRight(ifccParser::AdditionRightContext *ctx) override {
-    string var_name(ctx->VAR()->getText());
     string reg = "";
 
-    if (ctx->CONST() == NULL)
+    if (ctx->children.size() < 3)  
     {
+      string var_name(ctx->children[0]->getText());
     	reg = to_string(variables[var_name]) + "(%rbp)";
-    } else {
-	  	string i(ctx->CONST()->getText());
+    } else {       
+      string var_name(ctx->children[0]->getText());                 // array
+	  	string index_reg(visit(ctx->children[2]).as<std::string>());
 
-	  	int index = stoi(i);
-	  	index = index * variables_size[var_name];
+      cout << "   movl  " << index_reg << ", %eax\n";
+      cout << "   cltq  " << endl;
+      cout << "   leaq  0(,%rax,4), %rcx" << endl;
+      cout << "   leaq  " << var_name << "(%rip), %rdx\n";
 
-	  	string str_index = index == 0 ? "" :to_string(index)+"+";
-	  	reg = str_index + var_name + "(%rip)";
+      reg = "(%rcx, %rdx)";
     }
-
+/*
     if (variables_size[var_name] == 1)
     {
       cout << "  movsbl  " << reg << ", %eax\n";
     } else {
       cout << "  movl  " << reg << ", %eax\n";
     }
+*/
     cout << "  addl  $1, " << reg << endl;
     
     string ret("%eax");
@@ -511,20 +525,22 @@ public:
   }
 
   virtual antlrcpp::Any visitSubLeft(ifccParser::SubLeftContext *ctx) override {
-    string var_name(ctx->VAR()->getText());
     string reg = "";
 
-    if (ctx->CONST() == NULL)
+    if (ctx->children.size() < 3)   
     {
+      string var_name(ctx->children[1]->getText());
     	reg = to_string(variables[var_name]) + "(%rbp)";
-    } else {
-	  	string i(ctx->CONST()->getText());
+    } else {     
+      string var_name(ctx->children[1]->getText());                 // array
+	  	string index_reg(visit(ctx->children[3]).as<std::string>());
 
-	  	int index = stoi(i);
-	  	index = index * variables_size[var_name];
+      cout << "   movl  " << index_reg << ", %eax\n";
+      cout << "   cltq  " << endl;
+      cout << "   leaq  0(,%rax,4), %rcx" << endl;
+      cout << "   leaq  " << var_name << "(%rip), %rdx\n";
 
-	  	string str_index = index == 0 ? "" :to_string(index)+"+";
-	  	reg = str_index + var_name + "(%rip)";
+      reg = "(%rcx, %rdx)";
     }
 
     cout << "  subl  $1, " << reg << endl;
@@ -536,20 +552,22 @@ public:
   }
 
   virtual antlrcpp::Any visitSubRight(ifccParser::SubRightContext *ctx) override {
-    string var_name(ctx->VAR()->getText());
     string reg = "";
 
-    if (ctx->CONST() == NULL)
+    if (ctx->children.size() < 3)   
     {
+      string var_name(ctx->children[0]->getText());
     	reg = to_string(variables[var_name]) + "(%rbp)";
-    } else {
-	  	string i(ctx->CONST()->getText());
+    } else {        
+      string var_name(ctx->children[0]->getText());                // array
+	  	string index_reg(visit(ctx->children[2]).as<std::string>());
 
-	  	int index = stoi(i);
-	  	index = index * variables_size[var_name];
+      cout << "   movl  " << index_reg << ", %eax\n";
+      cout << "   cltq  " << endl;
+      cout << "   leaq  0(,%rax,4), %rcx" << endl;
+      cout << "   leaq  " << var_name << "(%rip), %rdx\n";
 
-	  	string str_index = index == 0 ? "" :to_string(index)+"+";
-	  	reg = str_index + var_name + "(%rip)";
+      reg = "(%rcx, %rdx)";
     }
 
     cout << "  movl  " << reg << ", %eax\n";
@@ -745,14 +763,15 @@ public:
   virtual antlrcpp::Any visitGetTab(ifccParser::GetTabContext *ctx) override {
 
   	string var_name(ctx->VAR()->getText());
-  	string i(ctx->CONST()->getText());
+  	string index_reg(visit(ctx->children[2]).as<std::string>());
 
-  	int index = stoi(i);
-  	index = index * variables_size[var_name];
+    cout << "   movl  " << index_reg << ", %eax\n";
+    cout << "   cltq  " << endl;
+    cout << "   leaq  0(,%rax,4), %rcx" << endl;
+    cout << "   leaq  " << var_name << "(%rip), %rdx\n";
 
-  	string str_index = index == 0 ? "" :to_string(index)+"+";
-  	string var = str_index + var_name + "(%rip)";
-  	return var;
+    string reg = "(%rcx, %rdx)";
+  	return reg;
   }
 
   /*

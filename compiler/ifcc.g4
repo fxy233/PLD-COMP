@@ -36,13 +36,13 @@ blockELSE : 'else' '{' list_instr '}';
 
 exprMulti : listExpr*;
 listExpr : ',' expr;
-expr  :  (VAR ('[' CONST ']')? '=')? rval;
+expr  :  (VAR ('[' rval ']')? '=')? rval;
 
-rval  :	 VAR ('[' CONST ']')? '++'		# additionRight
-	  |  VAR ('[' CONST ']')? '--'  		# subRight
+rval  :	 VAR ('[' rval ']')? '++'		# additionRight
+	  |  VAR ('[' rval ']')? '--'  		# subRight
 	  |  '(' expr listExpr* ')'	# par
-	  |  '++' VAR ('[' CONST ']')? 		# additionLeft
-	  |  '--' VAR ('[' CONST ']')?		# subLeft
+	  |  '++' VAR ('[' rval ']')? 		# additionLeft
+	  |  '--' VAR ('[' rval ']')?		# subLeft
 	  |  rval ('*'|'/') rval	# mlpDiv
 	  |  rval ('+'|'-') rval	# plsMns
 	  |  val						# value
@@ -52,7 +52,7 @@ rval  :	 VAR ('[' CONST ']')? '++'		# additionRight
 
 val : CONST		# getConst
 	| VAR		# getVAR
-	| VAR '[' CONST ']'		# getTab
+	| VAR '[' rval ']'		# getTab
 	; 
 
 myreturn : 'return' val ';'	# myReturn
