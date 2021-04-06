@@ -16,8 +16,8 @@ instr : type (dec|aff)* ';'												        # decal
 
 
 
-dec : ',' VAR     # dec1
-	| VAR  		  # dec2
+dec : ',' VAR ('[' CONST ']')?    # dec1
+	| VAR ('[' CONST ']')? 		  # dec2
 	;
 
 aff : (VAR '=')* rval    	# aff1
@@ -25,7 +25,7 @@ aff : (VAR '=')* rval    	# aff1
  	;
 
 condFOR1 : expr listExpr*					 # condWithoutDec
-		 | type VAR ('=' rval)? listExpr?    # condWithDec
+		 | type VAR ('[' CONST ']')? ('=' rval)? listExpr*    # condWithDec
 		 ;
 
 condFOR2 : expr listExpr*;
@@ -35,13 +35,13 @@ blockELSE : 'else' '{' list_instr '}';
 
 
 listExpr : ',' expr;
-expr  :  (VAR '=')? rval;
+expr  :  (VAR ('[' CONST ']')? '=')? rval;
 
-rval  :	 VAR '++'		# additionRight
-	  |  VAR '--'  		# subRight
+rval  :	 VAR ('[' CONST ']')? '++'		# additionRight
+	  |  VAR ('[' CONST ']')? '--'  		# subRight
 	  |  '(' expr listExpr* ')'	# par
-	  |  '++' VAR 		# additionLeft
-	  |  '--' VAR 		# subLeft
+	  |  '++' VAR ('[' CONST ']')? 		# additionLeft
+	  |  '--' VAR ('[' CONST ']')?		# subLeft
 	  |  rval ('*'|'/') rval	# mlpDiv
 	  |  rval ('+'|'-') rval	# plsMns
 	  |  val						# value
@@ -51,6 +51,7 @@ rval  :	 VAR '++'		# additionRight
 
 val : CONST		# getConst
 	| VAR		# getVAR
+	| VAR '[' CONST ']'		# getTab
 	; 
 
 myreturn : 'return' val ';'	# myReturn

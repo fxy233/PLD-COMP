@@ -24,6 +24,13 @@ public:
 
   virtual antlrcpp::Any visitProg(ifccParser::ProgContext *ctx) override {
 
+  	map<string, int>::iterator iter;
+    iter = variables.begin();
+    while(iter != variables.end()) {
+    	cout << ".comm  " << iter->first <<","<<to_string(iter->second)<<",0\n";
+    	iter++;
+    }
+
     cout <<  ".globl main\n"
            	 "  main: \n"
            	 "  pushq %rbp\n"
@@ -66,16 +73,22 @@ public:
   virtual antlrcpp::Any visitDec1(ifccParser::Dec1Context *ctx) override {
     
     string var_name(ctx->VAR()->getText());
-    variables[var_name] = 0;
-    variables_size[var_name] = typeSize;
+    if (ctx->CONST() == NULL) 
+    {
+    	variables[var_name] = 0;
+    	variables_size[var_name] = typeSize;
+    }	
     return 0;
   }
 
   virtual antlrcpp::Any visitDec2(ifccParser::Dec2Context *ctx) override {
     
     string var_name(ctx->VAR()->getText());
-    variables[var_name] = 0;
-    variables_size[var_name] = typeSize;
+    if (ctx->CONST() == NULL) 
+    {
+    	variables[var_name] = 0;
+    	variables_size[var_name] = typeSize;
+    }	
     return 0;
   }
 
@@ -89,6 +102,33 @@ public:
     for (size = size-3; size >=0; size=size-2)
     {
     	string var_name(ctx->children[size]->getText());
+
+    	// if (var_name == "]")
+    	// {
+    	// 	string tab_name(ctx->children[size-3]->getText());
+  			// string index(ctx->children[size-1]->getText());
+
+  			// int index = stoi(index);
+  			// index = index * variables_size[tab_name];
+
+  			// string str_index = index == 0 ? "" :to_string(index);
+  			// string var = str_index + "+" + var_name + "(%rip)";
+
+  			// string movl;
+    	// 	if (val.at(0) == '$' || val == "%eax")   // CONST | arith
+	   	// 	{
+	    //   		movl = "  movl  " + val + ", " + var;
+	   	// 	} else {                // VAR
+	    //  		movl = "  movl  " + val + ", %eax\n";
+	    //    		movl = movl + "  movl  %eax, " + var;
+	    // 	}
+    	// 	cout << movl << endl;
+
+    	// 	size = size - 3;
+
+    	// 	continue;
+    	// }
+
     	variables_size[var_name] = typeSize;
     	
     	cursor = cursor - variables_size[var_name];
@@ -118,6 +158,33 @@ public:
     for (size = size-3; size >=0; size=size-2)
     {
     	string var_name(ctx->children[size]->getText());
+
+    	// if (var_name == "]")
+    	// {
+    	// 	string tab_name(ctx->children[size-3]->getText());
+  			// string index(ctx->children[size-1]->getText());
+
+  			// int index = stoi(index);
+  			// index = index * variables_size[tab_name];
+
+  			// string str_index = index == 0 ? "" :to_string(index);
+  			// string var = str_index + "+" + var_name + "(%rip)";
+
+  			// string movl;
+    	// 	if (val.at(0) == '$' || val == "%eax")   // CONST | arith
+	   	// 	{
+	    //   		movl = "  movl  " + val + ", " + var;
+	   	// 	} else {                // VAR
+	    //  		movl = "  movl  " + val + ", %eax\n";
+	    //    		movl = movl + "  movl  %eax, " + var;
+	    // 	}
+    	// 	cout << movl << endl;
+
+    	// 	size = size - 3;
+
+    	// 	continue;
+    	// }
+
     	variables_size[var_name] = typeSize;
     	
     	cursor = cursor - variables_size[var_name];
@@ -145,6 +212,27 @@ public:
 
   virtual antlrcpp::Any visitExpr(ifccParser::ExprContext *ctx) override {
   	string val = visit(ctx->rval()).as<std::string>();
+
+  	if (ctx->CONST() != NULL)
+  	{
+		string tab_name(ctx->VAR()->getText());
+  		string i(ctx->CONST()->getText());
+
+  		int index = stoi(i);
+  		index = index * variables_size[tab_name];
+
+  		string str_index = index == 0 ? "" :to_string(index)+"+";
+  		string var = str_index + tab_name + "(%rip)";
+
+  		string movl;
+    	movl = "  movl  " + val + ", %eax\n";
+	    movl = movl + "  movl  %eax, " + var;
+	    cout << movl << endl; 
+
+	    string reg("%eax");
+  		return reg;
+  	}	
+
   	if (ctx->VAR() != NULL)
   	{	
   		string var_name(ctx->VAR()->getText());
@@ -161,7 +249,7 @@ public:
   		string movl;
     	movl = "  movl  " + val + ", %eax\n";
 	    movl = movl + "  movl  %eax, " + to_string(variables[var_name]) + "(%rbp)";
-	    cout << movl << endl;; 
+	    cout << movl << endl;
   	}
   	string reg("%eax");
   	return reg;
@@ -258,25 +346,52 @@ public:
     variables_size[var_name] = typeSize;
   	
   	if (ctx->rval() != NULL)
-  	{
-  		string val = visit(ctx->rval()).as<std::string>();	
-  		if (variables[var_name]  == 0) 
-    	{
-    		cursor = cursor - variables_size[var_name];
-    		variables[var_name] = cursor;
-    	}
-    	
-    	string movl;
-    	
-    	if (val.at(0) == '$' || val == "%eax")   // CONST | arith
-	   	{
-	      	movl = "  movl  " + val + ", " + to_string(variables[var_name]) + "(%rbp)";
-	   	} else {                // VAR
-	     	movl = "  movl  " + val + ", %eax\n";
-	       	movl = movl + "  movl  %eax, " + to_string(variables[var_name]) + "(%rbp)";
-	    }
+  	{	
+  		if (ctx->CONST() != NULL)
+  		{
+  			string tab_name(ctx->VAR()->getText());
+	  		string i(ctx->CONST()->getText());
 
-	    cout << movl << endl;
+	  		int index = stoi(i);
+	  		index = index * variables_size[tab_name];
+
+	  		string str_index = index == 0 ? "" :to_string(index)+"+";
+	  		string var = str_index + var_name + "(%rip)";
+
+	  		string val = visit(ctx->rval()).as<std::string>();	
+
+	  		string movl;
+	    	if (val.at(0) == '$' || val == "%eax")   // CONST | arith
+		   	{
+		      	movl = "  movl  " + val + ", " + var;
+		   	} else {                // VAR
+		     	movl = "  movl  " + val + ", %eax\n";
+		       	movl = movl + "  movl  %eax, " + var;
+		    }
+		    cout << movl << endl; 
+
+
+  		} else
+  		{
+  			string val = visit(ctx->rval()).as<std::string>();	
+	  		if (variables[var_name]  == 0) 
+	    	{
+	    		cursor = cursor - variables_size[var_name];
+	    		variables[var_name] = cursor;
+	    	}
+	    	
+	    	string movl;
+	    	
+	    	if (val.at(0) == '$' || val == "%eax")   // CONST | arith
+		   	{
+		      	movl = "  movl  " + val + ", " + to_string(variables[var_name]) + "(%rbp)";
+		   	} else {                // VAR
+		     	movl = "  movl  " + val + ", %eax\n";
+		       	movl = movl + "  movl  %eax, " + to_string(variables[var_name]) + "(%rbp)";
+		    }
+
+		    cout << movl << endl;
+  		}	
 
   	}	
 
@@ -328,8 +443,20 @@ public:
 
   virtual antlrcpp::Any visitAdditionLeft(ifccParser::AdditionLeftContext *ctx) override {
     string var_name(ctx->VAR()->getText());
+    string reg = "";
 
-    string reg(to_string(variables[var_name]) + "(%rbp)");
+    if (ctx->CONST() == NULL)
+    {
+    	reg = to_string(variables[var_name]) + "(%rbp)";
+    } else {
+	  	string i(ctx->CONST()->getText());
+
+	  	int index = stoi(i);
+	  	index = index * variables_size[var_name];
+
+	  	string str_index = index == 0 ? "" :to_string(index)+"+";
+	  	reg = str_index + var_name + "(%rip)";
+    }
 
     cout << "  addl  $1, " << reg << endl;
     cout << "  movl  " << reg << ", %eax\n";
@@ -341,8 +468,21 @@ public:
 
   virtual antlrcpp::Any visitAdditionRight(ifccParser::AdditionRightContext *ctx) override {
     string var_name(ctx->VAR()->getText());
+    string reg = "";
 
-    string reg(to_string(variables[var_name]) + "(%rbp)");
+    if (ctx->CONST() == NULL)
+    {
+    	reg = to_string(variables[var_name]) + "(%rbp)";
+    } else {
+	  	string i(ctx->CONST()->getText());
+
+	  	int index = stoi(i);
+	  	index = index * variables_size[var_name];
+
+	  	string str_index = index == 0 ? "" :to_string(index)+"+";
+	  	reg = str_index + var_name + "(%rip)";
+    }
+
     cout << "  movl  " << reg << ", %eax\n";
     cout << "  addl  $1, " << reg << endl;
     
@@ -360,8 +500,21 @@ public:
 
   virtual antlrcpp::Any visitSubLeft(ifccParser::SubLeftContext *ctx) override {
     string var_name(ctx->VAR()->getText());
+    string reg = "";
 
-    string reg(to_string(variables[var_name]) + "(%rbp)");
+    if (ctx->CONST() == NULL)
+    {
+    	reg = to_string(variables[var_name]) + "(%rbp)";
+    } else {
+	  	string i(ctx->CONST()->getText());
+
+	  	int index = stoi(i);
+	  	index = index * variables_size[var_name];
+
+	  	string str_index = index == 0 ? "" :to_string(index)+"+";
+	  	reg = str_index + var_name + "(%rip)";
+    }
+
     cout << "  subl  $1, " << reg << endl;
     cout << "  movl  " << reg << ", %eax\n";
     
@@ -372,8 +525,21 @@ public:
 
   virtual antlrcpp::Any visitSubRight(ifccParser::SubRightContext *ctx) override {
     string var_name(ctx->VAR()->getText());
+    string reg = "";
 
-    string reg(to_string(variables[var_name]) + "(%rbp)");
+    if (ctx->CONST() == NULL)
+    {
+    	reg = to_string(variables[var_name]) + "(%rbp)";
+    } else {
+	  	string i(ctx->CONST()->getText());
+
+	  	int index = stoi(i);
+	  	index = index * variables_size[var_name];
+
+	  	string str_index = index == 0 ? "" :to_string(index)+"+";
+	  	reg = str_index + var_name + "(%rip)";
+    }
+
     cout << "  movl  " << reg << ", %eax\n";
     cout << "  subl  $1, " << reg << endl;
     
@@ -564,6 +730,19 @@ public:
     return var;
   }
 
+  virtual antlrcpp::Any visitGetTab(ifccParser::GetTabContext *ctx) override {
+
+  	string var_name(ctx->VAR()->getText());
+  	string i(ctx->CONST()->getText());
+
+  	int index = stoi(i);
+  	index = index * variables_size[var_name];
+
+  	string str_index = index == 0 ? "" :to_string(index)+"+";
+  	string var = str_index + var_name + "(%rip)";
+  	return var;
+  }
+
   /*
 	return 
   */
@@ -579,6 +758,23 @@ public:
 
   void setVarSize(int size){
       varSize = size;
+  }
+
+  void setTabVar(map<string, int> &tab, map<string, int> &tabSize)
+  {
+  	map<string, int>::iterator iter;
+    iter = tab.begin();
+    while(iter != tab.end()) {
+    	variables[iter->first] = iter->second;
+    	iter++;
+    }
+
+    iter = tabSize.begin();
+    while(iter != tabSize.end()) {
+    	variables_size[iter->first] = iter->second;
+    	iter++;
+    }
+
   }
 
 private:
