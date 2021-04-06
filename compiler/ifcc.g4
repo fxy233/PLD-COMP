@@ -6,7 +6,7 @@ prog : 'int' 'main' '(' ')' '{' list_instr myreturn '}' ;
 
 list_instr : instr*;
 
-instr : type (dec|aff)* ';'												        # decal
+instr : type (dec1|aff1) (dec2|aff2)* ';'											# decal
 	  | expr listExpr* 	';'														# affect
 	  | blockIF																    # exprIF
 	  | 'putchar' '(' rval ')' ';' 											    # callputchar
@@ -16,16 +16,16 @@ instr : type (dec|aff)* ';'												        # decal
 
 
 
-dec : ',' VAR ('[' CONST ']')?    # dec1
-	| VAR ('[' CONST ']')? 		  # dec2
-	;
+dec1 : VAR ('[' CONST ']')?;
+dec2 : ',' VAR ('[' CONST ']')?;
 
-aff : (VAR '=')* rval    	# aff1
- 	| ',' (VAR '=')* rval   # aff2
- 	;
+
+
+aff1 : (VAR '=')* rval;    	
+aff2 : ',' (VAR '=')* rval;
 
 condFOR1 : expr listExpr*					 # condWithoutDec
-		 | type VAR ('[' CONST ']')? ('=' rval)? listExpr*    # condWithDec
+		 | type VAR ('[' CONST ']')? ('=' rval)? exprMulti?   # condWithDec
 		 ;
 
 condFOR2 : expr listExpr*;
@@ -34,6 +34,7 @@ blockIF : 'if' '(' rval ')' '{' list_instr '}' blockELSE?;
 blockELSE : 'else' '{' list_instr '}';
 
 
+exprMulti : listExpr*;
 listExpr : ',' expr;
 expr  :  (VAR ('[' CONST ']')? '=')? rval;
 

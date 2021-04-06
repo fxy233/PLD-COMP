@@ -306,9 +306,9 @@ public:
 
     } 
 
-    if ( ctx->listExpr() != NULL)
+    if ( ctx->exprMulti() != NULL)
     {
-      visit(ctx->listExpr());
+      visit(ctx->exprMulti());
     }
 
     typeSize = 0;
