@@ -59,12 +59,10 @@ myreturn : 'return' val ';'	# myReturn
          ;
 
 type : INT
-	 | LONG
 	 | CHAR
 	 ; 
 
 INT : 'int';
-LONG : 'long';
 CHAR : 'char';
 VAR : [a-zA-Z][a-zA-Z0-9]* ;
 CONST : [0-9]+ ;

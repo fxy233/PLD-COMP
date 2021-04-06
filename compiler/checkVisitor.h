@@ -38,10 +38,7 @@ public:
     } else if (var_type == "char") 
     {     
         typeSize = 1;
-    } else if (var_type == "long") 
-    {
-        typeSize = 8;
-    }
+    } 
 
     visitChildren(ctx);
 
@@ -54,7 +51,7 @@ public:
   {
     if (variables.count(var_name) > 0) 
     {       
-      cout << "error: the variable " << var_name << " can't be declared again ! " << endl;
+      cout << "error: the variable " << var_name << " can not be declared again ! " << endl;
       exit(0); 
     }
   }
@@ -63,7 +60,7 @@ public:
   {
       if (variables.count(var_name) == 0)
       {       
-          cout << "error: the variable " << var_name << " haven't been declared ! " << endl;
+          cout << "error: the variable " << var_name << " have not been declared ! " << endl;
           exit(0); 
       }
   }
@@ -72,13 +69,13 @@ public:
   {
     if (variables.count(var_name) == 0)
     {       
-      cout << "error: the variable " << var_name << " haven't been declared ! " << endl;
+      cout << "error: the variable " << var_name << " have not been declared ! " << endl;
       exit(0); 
     } else
     {
       if (variables[var_name] == 0)
       {
-        cout << "error: the variable " << var_name << " haven't been initialized ! " << endl;
+        cout << "error: the variable " << var_name << " have not been initialized ! " << endl;
         exit(0); 
       }
     }
@@ -97,12 +94,12 @@ public:
   {
     if (variables.count(var_name) == 0)
     {       
-      cout << "error: the variable " << var_name << " haven't been declared ! " << endl;
+      cout << "error: the variable " << var_name << " have not been declared ! " << endl;
       exit(0); 
     } 
     if (find(tab_init[var_name].begin(), tab_init[var_name].end(), index) == tab_init[var_name].end())
     {
-        cout << "error: the index " << index << " haven't been initialized ! " << endl;
+        cout << "error: the index " << index << " have not been initialized ! " << endl;
         exit(0); 
     }
   }
@@ -283,10 +280,7 @@ public:
     } else if (var_type == "char") 
     {     
         typeSize = 1;
-    } else if (var_type == "long") 
-    {
-        typeSize = 8;
-    }
+    } 
 
     string var_name(ctx->VAR()->getText());
 

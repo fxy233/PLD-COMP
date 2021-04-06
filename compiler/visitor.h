@@ -57,10 +57,7 @@ public:
     } else if (var_type == "char") 
     {     
         typeSize = 1;
-    } else if (var_type == "long") 
-    {
-        typeSize = 8;
-    }
+    } 
 
     visitChildren(ctx);
 
@@ -213,6 +210,8 @@ public:
   virtual antlrcpp::Any visitExpr(ifccParser::ExprContext *ctx) override {
   	string val = visit(ctx->rval()).as<std::string>();
 
+    //cout << "val expression : " << val << endl; 
+
   	if (ctx->CONST() != NULL)
   	{
 		string tab_name(ctx->VAR()->getText());
@@ -250,7 +249,11 @@ public:
     	movl = "  movl  " + val + ", %eax\n";
 	    movl = movl + "  movl  %eax, " + to_string(variables[var_name]) + "(%rbp)";
 	    cout << movl << endl;
-  	}
+  	} else {
+      string movl;
+      movl = "  movl  " + val + ", %eax\n";
+      cout << movl;
+    }
   	string reg("%eax");
   	return reg;
   }
@@ -336,10 +339,7 @@ public:
     } else if (var_type == "char") 
     {     
         typeSize = 1;
-    } else if (var_type == "long") 
-    {
-        typeSize = 8;
-    }
+    } 
 
     string var_name(ctx->VAR()->getText());
   	variables[var_name] = 0;
@@ -458,6 +458,13 @@ public:
 	  	reg = str_index + var_name + "(%rip)";
     }
 
+    if (variables_size[var_name] == 1)
+    {
+      cout << "  movsbl  " << reg << ", %eax\n";
+    } else {
+      cout << "  movl  " << reg << ", %eax\n";
+    }
+
     cout << "  addl  $1, " << reg << endl;
     cout << "  movl  " << reg << ", %eax\n";
     
@@ -483,7 +490,12 @@ public:
 	  	reg = str_index + var_name + "(%rip)";
     }
 
-    cout << "  movl  " << reg << ", %eax\n";
+    if (variables_size[var_name] == 1)
+    {
+      cout << "  movsbl  " << reg << ", %eax\n";
+    } else {
+      cout << "  movl  " << reg << ", %eax\n";
+    }
     cout << "  addl  $1, " << reg << endl;
     
     string ret("%eax");
@@ -723,7 +735,7 @@ public:
 
   virtual antlrcpp::Any visitGetVAR(ifccParser::GetVARContext *ctx) override {
 	
-	string var_name(ctx->VAR()->getText());
+	  string var_name(ctx->VAR()->getText());
   	
   	string var = to_string(variables[var_name]) + "(%rbp)";
 
