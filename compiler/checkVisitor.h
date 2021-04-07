@@ -22,10 +22,132 @@ class  CheckVisitor : public ifccBaseVisitor {
 public:
 
   virtual antlrcpp::Any visitProg(ifccParser::ProgContext *ctx) override {
-      visit(ctx->list_instr());
-      visit(ctx->myreturn());
+      visitChildren(ctx);
       return 0;
   };
+
+  virtual antlrcpp::Any visitDecGlobal(ifccParser::DecGlobalContext *ctx) override {
+      
+      string return_type(ctx->returnType()->getText());
+      int returnSize = 0;
+      if (return_type == "int") 
+      {
+          returnSize = 4;
+      } else if (return_type == "char") 
+      {     
+          returnSize = 1;
+      }
+
+      string fct_name(ctx->VAR()->getText());
+
+      function[fct_name] = returnSize;
+      currentFct = fct_name;
+
+      if (ctx->listPara() != NULL)
+      {
+        visit(ctx->listPara());
+      }
+
+      currentFct = "";
+
+      return 0;
+  };
+
+  virtual antlrcpp::Any visitListPara(ifccParser::ListParaContext *ctx) override {
+
+      int nb = (ctx->children.size() + 1)/3;
+
+      if (defFct == 0)
+      {
+        function_para[currentFct] = nb;
+      } else
+      {
+        if (function_para[currentFct] != nb)
+        {
+          cout << "error: the function " << currentFct << " does not have the same number of parameters as its declaration ! " << endl;
+          exit(0);
+        }
+
+        int i = 0;
+        int j = 1;
+        for (;j<ctx->children.size();) 
+        {
+          string paraType(ctx->children[i]->getText());
+          int paraSize = 0;
+          if (paraType == "int") 
+          {
+              paraSize = 4;
+          } else if (paraType == "char") 
+          {     
+              paraSize = 1;
+          }
+
+          string paraName(ctx->children[j]->getText());
+
+          variables[paraName] = 1;
+          variables_size[paraName] = paraSize;
+
+          i = i + 3;
+          j = j + 3;
+        }
+
+      }
+
+      return 0;
+  }
+
+  virtual antlrcpp::Any visitFunct(ifccParser::FunctContext *ctx) override {
+
+    string return_type(ctx->returnType()->getText());
+    int returnSize = 0;
+    if (return_type == "int") 
+    {
+      returnSize = 4;
+    } else if (return_type == "char") 
+    {     
+      returnSize = 1;
+    }
+
+    string fct_name(ctx->VAR()->getText());
+
+    currentFct = fct_name;
+
+    if (function[fct_name] != returnSize)
+    {
+      cout << "error: the function " << currentFct << " does not have the same return type as its declaration ! " << endl;
+      exit(0);
+    }
+
+    if (fctSize.size() == 0)
+    {
+      fctSize["main"] = getVarSize();
+    }
+    variables.clear();
+    variables_size.clear();
+
+    defFct = 1;
+
+    if (ctx->listPara() != NULL)
+    {
+      visit(ctx->listPara());
+    }
+
+    defFct = 0;
+
+    visit(ctx->list_instr());
+
+    fctSize[currentFct] = getVarSize();
+
+    // if (ctx->myreturn() != NULL)
+    // {
+    //   visit(ctx->myreturn());
+    // }
+
+
+    currentFct = "";
+
+    return 0;
+  }
 
 
   virtual antlrcpp::Any visitDecal(ifccParser::DecalContext *ctx) override {
@@ -442,6 +564,26 @@ public:
 
   }
 
+  virtual antlrcpp::Any visitCallfunction(ifccParser::CallfunctionContext *ctx) override {
+    string fctName(ctx->children[0]->getText());
+
+    if (function.count(fctName) == 0)
+    {
+      cout << "error : the function " << fctName << "have not been declared before !\n";
+      exit(0); 
+    }
+
+    int nb = (ctx->children.size()-2)/2;
+
+    if (function_para[fctName] != nb)
+    {
+      cout << "error : the function " << fctName << "does not have the same number of parameters as declared before =\n";
+      exit(0);
+    }
+
+    return 0;
+  }
+
   virtual antlrcpp::Any visitGetVAR(ifccParser::GetVARContext *ctx) override {
     string var_name(ctx->VAR()->getText());
 
@@ -452,7 +594,7 @@ public:
   
   virtual antlrcpp::Any visitMyReturn(ifccParser::MyReturnContext *ctx) override {
 
-  	visit(ctx->val());
+  	visit(ctx->rval());
     return 0;
   }
 
@@ -489,6 +631,11 @@ public:
     return tab_size;
   }
 
+  map<string, int> getFctSize()
+  {
+    return fctSize;
+  }
+
 private:
 
   map<string, int> variables;
@@ -498,6 +645,13 @@ private:
   map<string, int> tab_size;
   map<string, vector<int>> tab_init;
 
+  map<string, int> function;
+  map<string, int> function_para;
+
+  map<string, int> fctSize;
+
+  int defFct = 0;
+  string currentFct;
 
   int typeSize = 0;
 

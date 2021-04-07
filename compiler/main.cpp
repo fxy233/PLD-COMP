@@ -39,7 +39,9 @@ int main(int argn, const char **argv) {
   visitor.setVarSize(size);
   map<string, int> tab = checkVisitor.getTab();
   map<string, int> tab_size = checkVisitor.getTabSize();
+  map<string, int> fct = checkVisitor.getFctSize();
   visitor.setTabVar(tab, tab_size);
+  visitor.setFctSize(fct);
   visitor.visit(tree);
 
   return 0;

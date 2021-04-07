@@ -35,17 +35,120 @@ public:
            	 "  main: \n"
            	 "  pushq %rbp\n"
            	 "  movq %rsp, %rbp\n"
-             "  subq $" << to_string(varSize+4) << ", %rsp\n"; 
+             "  subq $" << to_string(fct_size["main"]+4) << ", %rsp\n"; 
     
     visit(ctx->list_instr());
-    visit(ctx->myreturn());
-	  
+    //visit(ctx->myreturn());
+
+	  cout <<  ".L" << returnLabel << ":" << endl;
     cout <<  "  movq %rbp, %rsp\n"
              "  popq %rbp\n"
              "  ret\n";
+
+    returnLabel++;
+
+    if (ctx->defFunction() != NULL)
+    {
+    	visit(ctx->defFunction());
+    }
     
     return 0;
   };
+
+  virtual antlrcpp::Any visitDecGlobal(ifccParser::DecGlobalContext *ctx) override {
+    return 0;
+  }
+
+  virtual antlrcpp::Any visitListPara(ifccParser::ListParaContext *ctx) override {
+  	int i = 0;
+    int j = 1;
+    int nb = 0;
+    for (;j<ctx->children.size();) 
+    {
+        string paraType(ctx->children[i]->getText());
+        int paraSize = 0;
+        if (paraType == "int") 
+        {
+            paraSize = 4;
+        } else if (paraType == "char") 
+        {     
+            paraSize = 1;
+        }
+
+        string paraName(ctx->children[j]->getText());
+
+        cursor = cursor - paraSize;
+        variables[paraName] = cursor;
+        variables_size[paraName] = paraSize;
+
+        cout << "	movl  " << paramReg[nb] << ", " << to_string(variables[paraName]) << "(%rbp)\n";
+
+        i = i + 3;
+        j = j + 3;
+        nb++;
+ 	}
+
+  	return 0;
+  }
+
+
+  virtual antlrcpp::Any visitFunct(ifccParser::FunctContext *ctx) override {
+  	
+  	variables.clear();
+  	variables_size.clear();
+  	cursor = 0;
+
+  	string fctName(ctx->VAR()->getText());
+  	cout <<  fctName
+  		 <<	 ": \n"
+           	 "  pushq %rbp\n"
+           	 "  movq %rsp, %rbp\n"
+             "  subq $" << to_string(fct_size[fctName]+4) << ", %rsp\n"; 
+    
+    if (ctx->listPara() != NULL)
+    {
+    	visit(ctx->listPara());
+    }
+
+    visit(ctx->list_instr());
+
+    // if (ctx->myreturn() != NULL)
+    // {
+    // 	visit(ctx->myreturn());	
+    // }
+    
+    cout <<  ".L" << returnLabel << ":" << endl;
+
+    cout <<  "  movq %rbp, %rsp\n"
+             "  popq %rbp\n"
+             "  ret\n";
+    returnLabel++;
+
+  	return 0;
+  }
+
+
+  virtual antlrcpp::Any visitCallfunction(ifccParser::CallfunctionContext *ctx) override {
+
+  	string fctName(ctx->children[0]->getText());
+
+  	if (ctx->children.size() > 3)
+  	{
+  		int nb = 0;
+  		int i = 2;
+  		for (; i< ctx->children.size();)
+  		{
+  			cout << "	movl  " << variables[ctx->children[i]->getText()] << "(%rbp), " << paramReg[nb] << endl;
+  			nb++;
+  			i = i+2;
+  		}
+  	}
+
+  	cout << "	call  " << fctName << endl;
+
+  	string reg("%eax");
+  	return reg;
+  }
 
   virtual antlrcpp::Any visitDecal(ifccParser::DecalContext *ctx) override {
     
@@ -780,8 +883,9 @@ public:
 
   virtual antlrcpp::Any visitMyReturn(ifccParser::MyReturnContext *ctx) override {
 
-  	string ret = "  movl  " + visit(ctx->val()).as<std::string>() + ", %eax";
+  	string ret = "  movl  " + visit(ctx->rval()).as<std::string>() + ", %eax";
   	cout << ret << endl;
+    cout << "   jmp   .L" << to_string(returnLabel) << endl; 
 
     return ret;
   }
@@ -808,12 +912,28 @@ public:
 
   }
 
+  void setFctSize(map<string, int> &fct)
+  {
+  	map<string, int>::iterator iter;
+    iter = fct.begin();
+    while(iter != fct.end()) {
+    	fct_size[iter->first] = iter->second;
+    	iter++;
+    }
+
+  }
+
 private:
 
   map<string, int> variables;
   map<string, int> variables_size;
+
+  map<string, int> fct_size;
+
+  string paramReg[6] = {"%edi", "%esi", "%edx", "%ecx", "%r8d", "%r9d"}; 
   int cursor = 0;
-  int label = 2;
+  int label = 10;
+  int returnLabel = 2;
   int varSize = 0;
   int typeSize = 0;
   

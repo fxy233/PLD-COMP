@@ -2,16 +2,30 @@ grammar ifcc;
 
 axiom : prog;
 
-prog : 'int' 'main' '(' ')' '{' list_instr myreturn '}' ;
+prog : decGlobal* 'int' 'main' '(' ')' '{' list_instr '}' defFunction?;
+
+defFunction : funct*;
+
+decGlobal : returnType VAR '(' listPara? ')' ';' ;
+
+listPara : type VAR (',' type VAR)*	;
+
+funct : returnType VAR '(' listPara? ')' '{' list_instr '}';
+
+returnType : INT
+		   | CHAR
+		   | 'void'
+		   ;
 
 list_instr : instr*;
 
-instr : type (dec1|aff1) (dec2|aff2)* ';'											# decal
+instr : type (dec1|aff1) (dec2|aff2)* ';'										# decal
 	  | expr listExpr* 	';'														# affect
 	  | blockIF																    # exprIF
 	  | 'putchar' '(' rval ')' ';' 											    # callputchar
 	  | 'while' '(' rval ')' '{' list_instr '}' 							    # exprWHILE
 	  | 'for' '(' condFOR1? ';' rval? ';' condFOR2? ')' '{' list_instr '}'     	# exprFOR
+	  | myreturn  # myReturnInstr
 	  ;
 
 
@@ -48,6 +62,7 @@ rval  :	 VAR ('[' rval ']')? '++'		# additionRight
 	  |  val						# value
 	  |  rval ('=='|'!='|'>'|'>='|'<'|'<=') rval  # comp
 	  |  'getchar' '(' ')'   # callgetchar
+	  |  VAR '(' (VAR (',' VAR)* )? ')'		# callfunction
 	  ; 
 
 val : CONST		# getConst
@@ -55,7 +70,7 @@ val : CONST		# getConst
 	| VAR '[' rval ']'		# getTab
 	; 
 
-myreturn : 'return' val ';'	# myReturn
+myreturn : 'return' rval ';'	# myReturn
          ;
 
 type : INT
