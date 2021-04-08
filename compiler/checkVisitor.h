@@ -124,6 +124,7 @@ public:
     }
     variables.clear();
     variables_size.clear();
+    
 
     defFct = 1;
 
@@ -590,13 +591,13 @@ public:
     checkDoubleDec(var_name);
     
     if (inBlock == 0)
-	{
-		variables[var_name] = 0;
-		variables_size[var_name] = typeSize;
-	} else {
-		variables_local[blockLabel][var_name] = 0;
-		variables_local[blockLabel][var_name] = typeSize;
-	}
+  	{
+  		variables[var_name] = 0;
+  		variables_size[var_name] = typeSize;
+  	} else {
+  		variables_local[blockLabel][var_name] = 0;
+  		variables_local[blockLabel][var_name] = typeSize;
+  	}
     
     if (ctx->rval() != NULL)
     {

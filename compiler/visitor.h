@@ -138,7 +138,8 @@ public:
   		int i = 2;
   		for (; i< ctx->children.size();)
   		{
-  			cout << "	movl  " << variables[ctx->children[i]->getText()] << "(%rbp), " << paramReg[nb] << endl;
+        string rvalue = visit(ctx->children[i]).as<std::string>();
+  			cout << "	movl  " << rvalue << ", " << paramReg[nb] << endl;
   			nb++;
   			i = i+2;
   		}

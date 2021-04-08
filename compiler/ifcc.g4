@@ -63,7 +63,7 @@ rval  :	 VAR ('[' rval ']')? '++'		# additionRight
 	  |  rval ('=='|'!='|'>'|'>='|'<'|'<=') rval  # comp
 	  |  rval ('|'|'&') rval  # andOr
 	  |  'getchar' '(' ')'   # callgetchar
-	  |  VAR '(' (VAR (',' VAR)* )? ')'		# callfunction
+	  |  rval '(' (rval (',' rval)* )? ')'		# callfunction
 	  ; 
 
 val : CONST		# getConst
