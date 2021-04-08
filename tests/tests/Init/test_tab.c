@@ -1,7 +1,7 @@
 int main()
 {
     int n = 5;
-    int a[n];
+    int a[5];
     int i = 0;
     for(; i < n;){
         a[i] = i;
