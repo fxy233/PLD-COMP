@@ -99,6 +99,7 @@ public:
   	cursor = 0;
 
   	string fctName(ctx->VAR()->getText());
+    cout << ".globl  " << fctName << "\n.type " << fctName << ",  @function" << endl;
   	cout <<  fctName
   		 <<	 ": \n"
            	 "  pushq %rbp\n"
