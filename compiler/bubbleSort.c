@@ -12,6 +12,11 @@ int main (){
     array[8] = 1;
     array[9] = 27;
     int temp;
+    for (int k = 0; k < 10; k++) {
+        printInt(array[k]);
+    }
+    putchar(10);
+    putchar(10);
     for (int i = 0; i < 10; i++) {
         for (int j = 0; j < 10 - 1; j++) {
             temp = array[j + 1];
