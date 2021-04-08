@@ -4,8 +4,7 @@ int main()
 	a = d, c = d;
 	if(a == c)
 	{
-		d=a+c;
-		d++,++d;
+		d = a++ + ++c;
 	}
 	return d;
 

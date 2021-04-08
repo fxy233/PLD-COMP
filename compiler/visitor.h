@@ -625,6 +625,7 @@ public:
       cout << "  movl  " << reg << ", %eax\n";
     }
 */
+    cout << "  movl  " << reg << ", %eax\n";
     cout << "  addl  $1, " << reg << endl;
     
     string ret("%eax");
