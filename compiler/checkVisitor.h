@@ -171,36 +171,100 @@ public:
 
   void checkDoubleDec(string var_name)
   {
-    if (variables.count(var_name) > 0) 
-    {       
-      cout << "error: the variable " << var_name << " can not be declared again ! " << endl;
-      exit(0); 
-    }
+  	if (inBlock == 0)
+  	{
+  		if (variables.count(var_name) > 0) 
+	    {       
+	      cout << "error: the variable " << var_name << " can not be declared again ! " << endl;
+	      exit(0); 
+	    }
+  	} else {
+  		if (variables_local[blockLabel].count(var_name) > 0) 
+	    {       
+	      cout << "error: the variable " << var_name << " can not be declared again ! " << endl;
+	      exit(0); 
+	    }
+  	}  
   }
 
   void checkAffWithoutDec(string var_name)
   {
-      if (variables.count(var_name) == 0)
-      {       
-          cout << "error: the variable " << var_name << " have not been declared ! " << endl;
-          exit(0); 
-      }
+  	  if (inBlock == 0)
+  	  {
+  	  	if (variables.count(var_name) == 0)
+	    {       
+	        cout << "error: the variable " << var_name << " has not been declared ! " << endl;
+	        exit(0); 
+	    }
+  	  } else {
+  	  	int error = 1;
+  	  	for (int i = blockLabel; i > 0; --i)
+  	  	{
+  	  		if (variables_local[blockLabel].count(var_name) > 0) {
+  	  			error = 0;
+  	  			break;
+  	  		}
+  	  	}
+
+  	  	if (error)
+  	  	{
+  	  		if (variables.count(var_name) == 0)
+		    {       
+		        cout << "error: the variable " << var_name << " has not been declared ! " << endl;
+		        exit(0); 
+		    }
+  	  	}
+  	  }
+      
   }
 
   void checkInitial(string var_name)
   {
-    if (variables.count(var_name) == 0)
-    {       
-      cout << "error: the variable " << var_name << " have not been declared ! " << endl;
-      exit(0); 
-    } else
-    {
-      if (variables[var_name] == 0)
-      {
-        cout << "error: the variable " << var_name << " have not been initialized ! " << endl;
-        exit(0); 
-      }
-    }
+
+    if (inBlock == 0)
+  	{
+    	if (variables.count(var_name) == 0)
+	    {       
+	      cout << "error: the variable " << var_name << " has not been declared ! " << endl;
+	      exit(0); 
+	    } else
+	    {
+	      if (variables[var_name] == 0)
+	      {
+	        cout << "error: the variable " << var_name << " has not been initialized ! " << endl;
+	        exit(0); 
+	      }
+	    }
+  	} else {
+  	  	int error = 1;
+  	  	int initial = 0;
+  	  	for (int i = blockLabel; i > 0; --i)
+  	  	{
+  	  		if (variables_local[blockLabel].count(var_name) > 0) {
+  	  			error = 0;
+  	  			initial = variables_local[blockLabel][var_name];
+  	  			break;
+  	  		}
+  	  	}
+
+  	  	if (error)
+  	  	{
+  	  		if (variables.count(var_name) == 0)
+		    {       
+		        cout << "error: the variable " << var_name << " has not been declared ! " << endl;
+		        exit(0); 
+		    } else {
+		    	initial = variables[var_name];
+		    }
+  	  	}
+
+  	  	if (initial)
+  	  	{}  else
+  	  	{
+  	  		cout << "error: the variable " << var_name << " has not been initialized ! " << endl;
+	        exit(0);
+  	  	}
+  	}
   }
 
 /*
@@ -218,7 +282,7 @@ public:
   {
     if (variables.count(var_name) == 0)
     {       
-      cout << "error: the variable " << var_name << " have not been declared ! " << endl;
+      cout << "error: the variable " << var_name << " has not been declared ! " << endl;
       exit(0); 
     } 
     // if (find(tab_init[var_name].begin(), tab_init[var_name].end(), index) == tab_init[var_name].end())
@@ -247,8 +311,15 @@ public:
       tab_init[var_name] = {-1};
     }
 
-    variables[var_name] = 0;
-    variables_size[var_name] = typeSize;
+    if (inBlock == 0)
+    {
+    	variables[var_name] = 0;
+    	variables_size[var_name] = typeSize;
+    } else {
+    	variables_local[blockLabel][var_name] = 0;
+    	variables_local[blockLabel][var_name] = typeSize;
+    }	
+    
     
     return 0;
   }
@@ -271,9 +342,15 @@ public:
       tab_init[var_name] = {-1};
     }
 
-    variables[var_name] = 0;
-    variables_size[var_name] = typeSize;
-    
+    if (inBlock == 0)
+    {
+    	variables[var_name] = 0;
+    	variables_size[var_name] = typeSize;
+    } else {
+    	variables_local[blockLabel][var_name] = 0;
+    	variables_local[blockLabel][var_name] = typeSize;
+    }
+
     return 0;
   }
 
@@ -290,13 +367,39 @@ public:
       if (typeSize != 0)
       {
         checkDoubleDec(var_name);
-        variables[var_name] = 0;
-        variables_size[var_name] = typeSize;
+        if (inBlock == 0)
+	    {
+	    	variables[var_name] = 0;
+	    	variables_size[var_name] = typeSize;
+	    } else {
+	    	variables_local[blockLabel][var_name] = 0;
+	    	variables_local[blockLabel][var_name] = typeSize;
+	    }
       }
 
       checkAffWithoutDec(var_name);
       
-      variables[var_name] = 1;
+      
+      if (inBlock == 0)
+	  {
+	    	variables[var_name] = 1;
+	  } else {
+	  		int init = 1;
+	  	  	for (int i = blockLabel; i > 0; --i)
+	  	  	{
+	  	  		if (variables_local[blockLabel].count(var_name) > 0) {
+	  	  			variables_local[blockLabel][var_name] = 1;
+	  	  			init = 0;
+	  	  			break;
+	  	  		}
+	  	  	}
+	  	  	if (init)
+	  	  	{
+	  	  		if (variables.count(var_name) > 0) {
+	  	  			variables[var_name] = 1;
+	  	  		}
+	  	  	}	
+	  }
     }
 
     return 0;
@@ -315,13 +418,39 @@ public:
       if (typeSize != 0)
       {
         checkDoubleDec(var_name);
-        variables[var_name] = 0;
-        variables_size[var_name] = typeSize;
+        if (inBlock == 0)
+	    {
+	    	variables[var_name] = 0;
+	    	variables_size[var_name] = typeSize;
+	    } else {
+	    	variables_local[blockLabel][var_name] = 0;
+	    	variables_local[blockLabel][var_name] = typeSize;
+	    }
       }
 
       checkAffWithoutDec(var_name);
       
-      variables[var_name] = 1;
+      if (inBlock == 0)
+	  {
+	    	variables[var_name] = 1;
+	  } else {
+	  	  	int init = 1;
+	  	  	for (int i = blockLabel; i > 0; --i)
+	  	  	{
+	  	  		if (variables_local[blockLabel].count(var_name) > 0) {
+	  	  			variables_local[blockLabel][var_name] = 1;
+	  	  			init = 0;
+	  	  			break;
+	  	  		}
+	  	  	}
+	  	  	if (init)
+	  	  	{
+	  	  		if (variables.count(var_name) > 0) {
+	  	  			variables[var_name] = 1;
+	  	  		}
+	  	  	}	
+	  	  	
+	  }
     }
     
     return 0;
@@ -357,12 +486,38 @@ public:
         if (typeSize != 0)
         {
           checkDoubleDec(var_name);
-          variables[var_name] = 0;
-          variables_size[var_name] = typeSize;
+          if (inBlock == 0)
+		  {
+		    	variables[var_name] = 0;
+		    	variables_size[var_name] = typeSize;
+		  } else {
+		    	variables_local[blockLabel][var_name] = 0;
+		    	variables_local[blockLabel][var_name] = typeSize;
+		  }
         }
 
         checkAffWithoutDec(var_name);
-        variables[var_name] = 1;
+        if (inBlock == 0)
+		  {
+		    	variables[var_name] = 1;
+		  } else {
+		  	  	int init = 1;
+		  	  	for (int i = blockLabel; i > 0; --i)
+		  	  	{
+		  	  		if (variables_local[blockLabel].count(var_name) > 0) {
+		  	  			variables_local[blockLabel][var_name] = 1;
+		  	  			init = 0;
+		  	  			break;
+		  	  		}
+		  	  	}
+		  	  	if (init)
+		  	  	{
+		  	  		if (variables.count(var_name) > 0) {
+		  	  			variables[var_name] = 1;
+		  	  		}
+		  	  	}	
+		  	  	
+		  }
       }else
       {
         visit(ctx->children[0]);
@@ -379,14 +534,22 @@ public:
 
   virtual antlrcpp::Any visitExprWHILE(ifccParser::ExprWHILEContext *ctx) override {
     
+  	blockLabel++;
+  	inBlock++;
     visit(ctx->list_instr());
     visit(ctx->rval());
+    variables_local[blockLabel].clear();
+    blockLabel--;
+    inBlock--;
+
 
     return 0;
   }
 
   virtual antlrcpp::Any visitExprFOR(ifccParser::ExprFORContext *ctx) override {
 
+  	blockLabel++;
+  	inBlock++;
     if (ctx->condFOR1() != NULL)
     {
       visit(ctx->condFOR1());
@@ -400,6 +563,9 @@ public:
     }
 
     visit(ctx->rval());
+    variables_local[blockLabel].clear();
+    blockLabel--;
+    inBlock--;
 
     return 0;
   }
@@ -420,17 +586,40 @@ public:
 
     checkDoubleDec(var_name);
     
-    variables[var_name] = 0;
-    variables_size[var_name] = typeSize;
+    if (inBlock == 0)
+	{
+		variables[var_name] = 0;
+		variables_size[var_name] = typeSize;
+	} else {
+		variables_local[blockLabel][var_name] = 0;
+		variables_local[blockLabel][var_name] = typeSize;
+	}
     
     if (ctx->rval() != NULL)
     {
 
       visit(ctx->rval());  
-      if (variables[var_name]  == 0) 
-      {
-        variables[var_name] = 1;
-      }
+      if (inBlock == 0)
+	  {
+	    	variables[var_name] = 1;
+	  } else {
+	  	  	int init = 1;
+	  	  	for (int i = blockLabel; i > 0; --i)
+	  	  	{
+	  	  		if (variables_local[blockLabel].count(var_name) > 0) {
+	  	  			variables_local[blockLabel][var_name] = 1;
+	  	  			init = 0;
+	  	  			break;
+	  	  		}
+	  	  	}
+	  	  	if (init)
+	  	  	{
+	  	  		if (variables.count(var_name) > 0) {
+	  	  			variables[var_name] = 1;
+	  	  		}
+	  	  	}	
+	  	  	
+	  }
 
     } 
 
@@ -446,12 +635,17 @@ public:
   }
 
   virtual antlrcpp::Any visitBlockIF(ifccParser::BlockIFContext *ctx) override {
+  	blockLabel++;
+  	inBlock++;
     visit(ctx->rval());
     visit(ctx->list_instr());
     if (ctx->blockELSE() != NULL) 
     {
       visit(ctx->blockELSE());
     }
+    variables_local[blockLabel].clear();
+    blockLabel--;
+    inBlock--;
     return 0;
   }
 
@@ -649,6 +843,11 @@ private:
   map<string, int> function_para;
 
   map<string, int> fctSize;
+
+  map<int, map<string, int>> variables_local;
+  map<int, map<string, int>> variables_local_size;
+  int blockLabel = 0;
+  int inBlock = 0;
 
   int defFct = 0;
   string currentFct;
