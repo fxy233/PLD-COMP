@@ -124,6 +124,7 @@ public:
     }
     variables.clear();
     variables_size.clear();
+    sizeTotal = 0;
     
 
     defFct = 1;
@@ -316,9 +317,12 @@ public:
     {
     	variables[var_name] = 0;
     	variables_size[var_name] = typeSize;
+      sizeTotal += typeSize;
     } else {
     	variables_local[blockLabel][var_name] = 0;
     	variables_local[blockLabel][var_name] = typeSize;
+      sizeTotal += typeSize;
+
     }	
     
     
@@ -347,9 +351,13 @@ public:
     {
     	variables[var_name] = 0;
     	variables_size[var_name] = typeSize;
+            sizeTotal += typeSize;
+
     } else {
     	variables_local[blockLabel][var_name] = 0;
     	variables_local[blockLabel][var_name] = typeSize;
+            sizeTotal += typeSize;
+
     }
 
     return 0;
@@ -371,9 +379,13 @@ public:
 	    {
 	    	variables[var_name] = 0;
 	    	variables_size[var_name] = typeSize;
+              sizeTotal += typeSize;
+
 	    } else {
 	    	variables_local[blockLabel][var_name] = 0;
 	    	variables_local[blockLabel][var_name] = typeSize;
+              sizeTotal += typeSize;
+
 	    }
       }
 
@@ -424,9 +436,13 @@ public:
 	    {
 	    	variables[var_name] = 0;
 	    	variables_size[var_name] = typeSize;
+              sizeTotal += typeSize;
+
 	    } else {
 	    	variables_local[blockLabel][var_name] = 0;
 	    	variables_local[blockLabel][var_name] = typeSize;
+              sizeTotal += typeSize;
+
 	    }
       }
 
@@ -494,9 +510,13 @@ public:
 		  {
 		    	variables[var_name] = 0;
 		    	variables_size[var_name] = typeSize;
+                sizeTotal += typeSize;
+
 		  } else {
 		    	variables_local[blockLabel][var_name] = 0;
 		    	variables_local[blockLabel][var_name] = typeSize;
+                sizeTotal += typeSize;
+
 		  }
         }
 
@@ -594,9 +614,13 @@ public:
   	{
   		variables[var_name] = 0;
   		variables_size[var_name] = typeSize;
+            sizeTotal += typeSize;
+
   	} else {
   		variables_local[blockLabel][var_name] = 0;
   		variables_local[blockLabel][var_name] = typeSize;
+            sizeTotal += typeSize;
+
   	}
     
     if (ctx->rval() != NULL)
@@ -810,15 +834,7 @@ public:
 
   int getVarSize()
   {
-    int size = 0;
-    map<string, int>::iterator iter;
-    iter = variables_size.begin();
-    while(iter != variables_size.end()) {
-      size += iter->second;
-      iter++;
-
-    }
-    return size;
+    return sizeTotal;
   }
 
   map<string, int> getTab()
@@ -861,5 +877,6 @@ private:
   int typeSize = 0;
   int sizeTmp = 0;
 
+  int sizeTotal = 0;
 };
 
