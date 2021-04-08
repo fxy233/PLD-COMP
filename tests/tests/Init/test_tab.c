@@ -7,5 +7,5 @@ int main()
         a[i] = i;
         i++;
     }
-    return 0;
+    return a[4];
 }
