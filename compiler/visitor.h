@@ -334,16 +334,20 @@ public:
 		  string tab_name(ctx->VAR()->getText());
   		string index_reg(visit(ctx->children[2]).as<std::string>());
 
-      cout << "   movl  " << index_reg << ", %eax\n";
-      cout << "   cltq  " << endl;
-      cout << "   leaq  0(,%rax,4), %rcx" << endl;
-      cout << "   leaq  " << tab_name << "(%rip), %rdx\n";
-
-  		string var = "(%rcx, %rdx)";
+      
       
       string val = visit(ctx->children[5]).as<std::string>();
   		string movl;
     	movl = "  movl  " + val + ", %eax\n";
+
+      cout << "   movl  " << index_reg << ", %edi\n";
+      cout << "   cltq  " << endl;
+      cout << "   leaq  0(,%rdi,4), %rcx" << endl;
+      cout << "   leaq  " << tab_name << "(%rip), %rdx\n";
+
+      string var = "(%rcx, %rdx)";
+
+
 	    movl = movl + "  movl  %eax, " + var;
 	    cout << movl << endl; 
 
@@ -912,8 +916,9 @@ public:
     cout << "   cltq  " << endl;
     cout << "   leaq  0(,%rax,4), %rcx" << endl;
     cout << "   leaq  " << var_name << "(%rip), %rdx\n";
+    cout << "   movl  (%rcx, %rdx), %eax\n";
 
-    string reg = "(%rcx, %rdx)";
+    string reg = "%eax";
   	return reg;
   }
 
