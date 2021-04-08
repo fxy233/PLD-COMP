@@ -1,12 +1,13 @@
 int printRangRec(int n, int length);
 void printInt(int n);
+int getInt();
 void printSpace(int n);
 
 
 int main(){
     int temps [1000];
     int arr [1000];
-    int length = getchar() - 48;
+    int length = getInt();
     printRangRec(length, length);
     return 0;
 }
@@ -46,6 +47,22 @@ int printRangRec(int n, int nbTotal){
     }
 
     return 0;
+}
+
+void printInt(int n)
+{
+    int nb [10];
+    int length = 0;
+    while( n/10 | n-n/10*10 )
+    {
+        nb[length] = n - n/10*10;
+        n = n/10;
+        ++length;
+    }
+    for(int i = length - 1; i >= 0; --i){
+        putchar(nb[i] + 48);
+    }
+    putchar(32);
 }
 
 void printInt(int n)
