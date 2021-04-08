@@ -800,6 +800,28 @@ public:
     
     return reg;
   }
+  virtual antlrcpp::Any visitAndOr(ifccParser::AndOrContext *ctx) override {
+      string op = ctx->children[1]->getText();
+      if (op == "&") {
+          string operand1(visit(ctx->rval(0)).as<std::string>());
+          cout << "  movl  " + operand1 + ", %edx\n";
+          string operand2(visit(ctx->rval(1)).as<std::string>());
+          cout << "  movl  " + operand2 + ", %eax\n";
+          cout << "  andl %edx, %eax \n";
+          string reg("%eax");
+          return reg;
+      } else if (op == "|") {
+          string operand1(visit(ctx->rval(0)).as<std::string>());
+          cout << "  movl  " + operand1 + ", %edx\n";
+          string operand2(visit(ctx->rval(1)).as<std::string>());
+          cout << "  movl  " + operand2 + ", %eax\n";
+          cout << "  orl %edx, %eax \n";
+          string reg("%eax");
+          return reg;
+      }
+      string reg("%eax");
+      return reg;
+  }
 	
 
   virtual antlrcpp::Any visitValue(ifccParser::ValueContext *ctx) override {

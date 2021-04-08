@@ -35,7 +35,7 @@ dec2 : ',' VAR ('[' CONST ']')?;
 
 
 
-aff1 : (VAR '=')* rval;    	
+aff1 : (VAR '=')* rval;
 aff2 : ',' (VAR '=')* rval;
 
 condFOR1 : expr listExpr*					 # condWithoutDec
@@ -61,6 +61,7 @@ rval  :	 VAR ('[' rval ']')? '++'		# additionRight
 	  |  rval ('+'|'-') rval	# plsMns
 	  |  val						# value
 	  |  rval ('=='|'!='|'>'|'>='|'<'|'<=') rval  # comp
+	  |  rval ('|'|'&') rval  # andOr
 	  |  'getchar' '(' ')'   # callgetchar
 	  |  VAR '(' (VAR (',' VAR)* )? ')'		# callfunction
 	  ; 
@@ -68,7 +69,7 @@ rval  :	 VAR ('[' rval ']')? '++'		# additionRight
 val : CONST		# getConst
 	| VAR		# getVAR
 	| VAR '[' rval ']'		# getTab
-	; 
+	;
 
 myreturn : 'return' rval ';'	# myReturn
          ;
