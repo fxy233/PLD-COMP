@@ -199,8 +199,12 @@ public:
 
     string val = visit(ctx->children[size-1]).as<std::string>();	// getRvalue
 
-    typeSize = sizeTmp;
-    sizeTmp = 0;
+    if (sizeTmp != 0)
+    {
+      typeSize = sizeTmp;
+      sizeTmp = 0;
+    }
+    
 
     for (size = size-3; size >=0; size=size-2)
     {
@@ -258,8 +262,11 @@ public:
 
     string val = visit(ctx->children[size-1]).as<std::string>();	// getRvalue
 
-    typeSize = sizeTmp;
-    sizeTmp = 0;
+    if (sizeTmp != 0)
+    {
+      typeSize = sizeTmp;
+      sizeTmp = 0;
+    }
 
     for (size = size-3; size >=0; size=size-2)
     {
