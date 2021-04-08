@@ -201,7 +201,7 @@ public:
   	  	int error = 1;
   	  	for (int i = blockLabel; i > 0; --i)
   	  	{
-  	  		if (variables_local[blockLabel].count(var_name) > 0) {
+  	  		if (variables_local[i].count(var_name) > 0) {
   	  			error = 0;
   	  			break;
   	  		}
@@ -241,9 +241,9 @@ public:
   	  	int initial = 0;
   	  	for (int i = blockLabel; i > 0; --i)
   	  	{
-  	  		if (variables_local[blockLabel].count(var_name) > 0) {
+  	  		if (variables_local[i].count(var_name) > 0) {
   	  			error = 0;
-  	  			initial = variables_local[blockLabel][var_name];
+  	  			initial = variables_local[i][var_name];
   	  			break;
   	  		}
   	  	}
@@ -281,7 +281,7 @@ public:
 
   void checkTabInit(string var_name)
   {
-    if (variables.count(var_name) == 0)
+    if (tab.count(var_name) == 0)
     {       
       cout << "error: the variable " << var_name << " has not been declared ! " << endl;
       exit(0); 
@@ -387,8 +387,8 @@ public:
 	  		int init = 1;
 	  	  	for (int i = blockLabel; i > 0; --i)
 	  	  	{
-	  	  		if (variables_local[blockLabel].count(var_name) > 0) {
-	  	  			variables_local[blockLabel][var_name] = 1;
+	  	  		if (variables_local[i].count(var_name) > 0) {
+	  	  			variables_local[i][var_name] = 1;
 	  	  			init = 0;
 	  	  			break;
 	  	  		}
@@ -439,8 +439,8 @@ public:
 	  	  	int init = 1;
 	  	  	for (int i = blockLabel; i > 0; --i)
 	  	  	{
-	  	  		if (variables_local[blockLabel].count(var_name) > 0) {
-	  	  			variables_local[blockLabel][var_name] = 1;
+	  	  		if (variables_local[i].count(var_name) > 0) {
+	  	  			variables_local[i][var_name] = 1;
 	  	  			init = 0;
 	  	  			break;
 	  	  		}
@@ -508,8 +508,8 @@ public:
 		  	  	int init = 1;
 		  	  	for (int i = blockLabel; i > 0; --i)
 		  	  	{
-		  	  		if (variables_local[blockLabel].count(var_name) > 0) {
-		  	  			variables_local[blockLabel][var_name] = 1;
+		  	  		if (variables_local[i].count(var_name) > 0) {
+		  	  			variables_local[i][var_name] = 1;
 		  	  			init = 0;
 		  	  			break;
 		  	  		}
@@ -610,8 +610,8 @@ public:
 	  	  	int init = 1;
 	  	  	for (int i = blockLabel; i > 0; --i)
 	  	  	{
-	  	  		if (variables_local[blockLabel].count(var_name) > 0) {
-	  	  			variables_local[blockLabel][var_name] = 1;
+	  	  		if (variables_local[i].count(var_name) > 0) {
+	  	  			variables_local[i][var_name] = 1;
 	  	  			init = 0;
 	  	  			break;
 	  	  		}
