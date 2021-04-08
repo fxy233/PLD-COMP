@@ -7,13 +7,13 @@ void printSpace(int n);
 int main(){
     int temps [1000];
     int arr [1000];
-    int length = getInt();
+    /* int length = getInt();*/
+    int length = 9;
     printRangRec(length, length);
     return 0;
 }
 
 int printRangRec(int n, int nbTotal){
-    int temp;
     if(n == 1) 
     {
         for(int i = 0; i < 2*nbTotal; ++i) {putchar(95);}
@@ -23,7 +23,6 @@ int printRangRec(int n, int nbTotal){
         putchar(1 + 48);
         putchar(10);
         arr[0] = 1;
-        putchar(1 + 48);
         return 0;
     }
 
@@ -37,8 +36,7 @@ int printRangRec(int n, int nbTotal){
             if(i == n-1) {arr[n-1] = 1;}
             else {arr[i] = temps[i-1] + temps[i];}
         }
-        temp = arr[i];
-        printInt(temp);
+        printInt(arr[i]);
     }    
 
     putchar(10);
@@ -49,21 +47,26 @@ int printRangRec(int n, int nbTotal){
     return 0;
 }
 
-void printInt(int n)
+
+int getInt()
 {
-    int nb [10];
+    int a[10];
     int length = 0;
-    while( n/10 | n-n/10*10 )
+    int res = 0;
+    int c = getchar();
+    while(c-10){
+        a[length++] = c - 48;
+        c = getchar();
+    }
+    int timer = 1;
+    for (int i = length-1; i >= 0; --i)
     {
-        nb[length] = n - n/10*10;
-        n = n/10;
-        ++length;
+        res = res + a[i]*timer;
+        timer = timer * 10;
     }
-    for(int i = length - 1; i >= 0; --i){
-        putchar(nb[i] + 48);
-    }
-    putchar(32);
+    return res;
 }
+
 
 void printInt(int n)
 {
