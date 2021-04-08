@@ -12,19 +12,16 @@ int main (){
     array[8] = 1;
     array[9] = 0;
     int temp;
-    int tmp;
     int k;
     for (int i = 0; i < 10; i++) {
         for (int j = 0; j < 10 - 1; j++) {
             temp = array[j + 1];
-            tmp = array[j];
-            if (temp < tmp) {
-
-                array[j + 1] = tmp;
+            if (array[j + 1] < array[j]) {
+                array[j + 1] = array[j];
                 array[j] = temp;
             }
         }
-        for (k = 0; k < 10; k++) {
+        for (int k = 0; k < 10; k++) {
             putchar(array[k] + 48);
         }
         putchar(10);

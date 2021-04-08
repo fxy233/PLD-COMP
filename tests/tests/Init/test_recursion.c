@@ -11,7 +11,7 @@ int main()
 int naturalSum(int n) {
     if (n > 0) {
         int temp = n - 1;
-        return n + naturalSum(temp);
+        return n + (naturalSum(temp));
     } else {
         return 0;
     }
