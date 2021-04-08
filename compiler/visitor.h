@@ -199,6 +199,9 @@ public:
 
     string val = visit(ctx->children[size-1]).as<std::string>();	// getRvalue
 
+    typeSize = sizeTmp;
+    sizeTmp = 0;
+
     for (size = size-3; size >=0; size=size-2)
     {
     	string var_name(ctx->children[size]->getText());
@@ -254,6 +257,9 @@ public:
   	int size = ctx->children.size();
 
     string val = visit(ctx->children[size-1]).as<std::string>();	// getRvalue
+
+    typeSize = sizeTmp;
+    sizeTmp = 0;
 
     for (size = size-3; size >=0; size=size-2)
     {
@@ -621,6 +627,9 @@ public:
   }
 
   virtual antlrcpp::Any visitPar(ifccParser::ParContext *ctx) override {
+    sizeTmp = typeSize;
+    typeSize = 0;
+
     visitChildren(ctx);
 
     string ret("%eax");
@@ -936,6 +945,7 @@ private:
   int returnLabel = 2;
   int varSize = 0;
   int typeSize = 0;
+  int sizeTmp = 0;
   
 };
 

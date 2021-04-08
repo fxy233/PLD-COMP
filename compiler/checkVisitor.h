@@ -358,7 +358,6 @@ public:
     
     int size = ctx->children.size();
 
-    visit(ctx->children[size-1]);  
 
     for (size = size-3; size >=0; size=size-2)
     {
@@ -402,6 +401,9 @@ public:
 	  }
     }
 
+    visit(ctx->children[ctx->children.size()-1]);  
+
+
     return 0;
   }
 
@@ -409,7 +411,6 @@ public:
 
     int size = ctx->children.size();
 
-    visit(ctx->children[size-1]);
 
     for (size = size-3; size >=0; size=size-2)
     {
@@ -453,6 +454,8 @@ public:
 	  }
     }
     
+    visit(ctx->children[ctx->children.size()-1]);
+
     return 0;
   }
 
@@ -727,6 +730,8 @@ public:
   }
 
   virtual antlrcpp::Any visitPar(ifccParser::ParContext *ctx) override {
+    sizeTmp = typeSize;
+    typeSize = 0;
     visitChildren(ctx);
     return 0;
   }
@@ -853,6 +858,7 @@ private:
   string currentFct;
 
   int typeSize = 0;
+  int sizeTmp = 0;
 
 };
 
