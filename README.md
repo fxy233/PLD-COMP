@@ -73,7 +73,7 @@
    int main(){
        int i = 0;
        while(i - 10){
-   			i = i + 1;
+           i = i + 1;
        }
        return i;
    }
@@ -86,10 +86,10 @@
       int j = 0;
       int a = 0;
       for(int i = 0; i < 20; i++){
-   	 		j = 0;
-   			while(j < 12){
+   	      j = 0;
+            while(j < 12){
                j = j + 1;
-   	    			a = a + 1;
+   	    		a = a + 1;
          }
       }
       return a;
@@ -114,12 +114,12 @@
 
 6. Appel de getchar et putchar
 
-   ```
+   ```c
    int main(){
-   	int a = getchar();
-   	a++;
-   	putchar(a);
-   	return 0;
+      int a = getchar();
+      a++;
+      putchar(a);
+      return 0;
    }
    ```
 
