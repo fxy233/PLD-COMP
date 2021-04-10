@@ -43,8 +43,8 @@
 
    ```c
    int main(){
-   	if(1){
-   		int a = 20;
+      if(1){
+         int a = 20;
    	}
    	return a;				// Error!
    }
@@ -90,11 +90,11 @@
 
    ```c
    int main(){
-       int i = 0;
-       while(i - 10){
-   			i = i + 1;
-       }
-       return i;
+      int i = 0;
+      while(i - 10){
+   	   i = i + 1;
+      }
+      return i;
    }
    ```
 
@@ -109,10 +109,10 @@
       int j = 0;
       int a = 0;
       for(int i = 0; i < 20; i++){
-   	 		j = 0;
-   			while(j < 12){
-               j = j + 1;
-   	    			a = a + 1;
+   	   j = 0;
+   	   while(j < 12){
+            j = j + 1;
+   	      a = a + 1;
          }
       }
       return a;
@@ -143,10 +143,10 @@
 
    ```
    int main(){
-   	int a = getchar();
-   	a++;
-   	putchar(a);
-   	return 0;
+      int a = getchar();
+      a++;
+      putchar(a);
+      return 0;
    }
    ```
 
@@ -159,19 +159,19 @@
    
    int main()
    {
-       int range = 10;
-       int res;
-       res = naturalSum(range);
-       return res;
+      int range = 10;
+      int res;
+      res = naturalSum(range);
+      return res;
    }
    
    int naturalSum(int n) {
-       if (n > 0) {
-           int temp = n - 1;
-           return n + (naturalSum(temp));
-       } else {
-           return 0;
-       }
+      if (n > 0) {
+         int temp = n - 1;
+         return n + (naturalSum(temp));
+      } else {
+         return 0;
+      }
    }
    ```
 
