@@ -39,7 +39,7 @@
 
    
 
-2.  Scope des variables
+2. Scope des variables
 
    ```c
    int main(){
