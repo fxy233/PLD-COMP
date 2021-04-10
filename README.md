@@ -19,7 +19,7 @@
    ```
    ./compile2exec.sh test.c
    ./a.out
-```
+   ```
    
    
 
