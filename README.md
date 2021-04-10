@@ -237,7 +237,7 @@ lien description: https://docs.google.com/document/d/1eGIWu76q2qLuqb54eIOfVNwOtD
               int a = 20;
           }
           int b = a;
-          return a;				// error : the variable a has not been initialized !
+          return a;	// error : the variable a has not been initialized !
       }
       ```
    
