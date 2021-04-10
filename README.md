@@ -74,7 +74,7 @@ lien description: https://docs.google.com/document/d/1eGIWu76q2qLuqb54eIOfVNwOtD
       int main(){
           int i = 0;
           while(i - 10){
-      	     i = i + 1;
+              i = i + 1;
           }
           return i;
       }
