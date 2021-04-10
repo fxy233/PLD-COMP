@@ -73,7 +73,7 @@
    int main(){
        int i = 0;
        while(i - 10){
-   			i = i + 1;
+   	     i = i + 1;
        }
        return i;
    }
@@ -86,10 +86,10 @@
       int j = 0;
       int a = 0;
       for(int i = 0; i < 20; i++){
-   	 		j = 0;
-   			while(j < 12){
-               j = j + 1;
-   	    			a = a + 1;
+          j = 0;
+          while(j < 12){
+              j = j + 1;
+              a = a + 1;
          }
       }
       return a;
@@ -114,12 +114,12 @@
 
 6. Appel de getchar et putchar
 
-   ```
+   ```c
    int main(){
-   	int a = getchar();
-   	a++;
-   	putchar(a);
-   	return 0;
+       int a = getchar();
+       a++;
+       putchar(a);
+       return 0;
    }
    ```
 
@@ -157,9 +157,9 @@
    ```c
    int main()
    {
-   	int a, b;
-   	int a = 7;   // error: the variable a has been declared before !
-   	return a;
+       int a, b;
+       int a = 7;   // error: the variable a has been declared before !
+       return a;
    }
    ```
 
@@ -168,9 +168,9 @@
    ```c
    int main()
    {
-   	int a, b;
-   	c = 4;   // error: the variable c has not been declared before !
-   	return a;
+       int a, b;
+       c = 4;   // error: the variable c has not been declared before !
+       return a;
    }
    ```
 
@@ -179,9 +179,9 @@
    ```c
    int main()
    {
-   	int a, b;
-   	a = b;   // error: the variable b has not been initialised before !
-   	return a;
+       int a, b;
+       a = b;   // error: the variable b has not been initialised before !
+       return a;
    }
    ```
 
@@ -190,19 +190,19 @@
    ```c
    int main()
    {
-   	int a = 5, b =10;
-   	int c = max(a, b);  // error: the function max has not been declared before !
-   	return c;
+       int a = 5, b =10;
+       int c = max(a, b);  // error: the function max has not been declared before !
+       return c;
    }
    
    int max(int a, int b)
    {
-   	if (a < b)
-   	{
-   		return b;
-   	} else {
-   		return a;
-   	}
+       if (a < b)
+       {
+           return b;
+           } else {
+           return a;
+       }
    }
    ```
 
@@ -212,19 +212,19 @@
    int max(int a)
    int main()
    {
-   	int a = 5, b =10;
-   	int c = max(a, b);  // error: the function max doesn't have the same signature as declaration before !
-   	return c;
+       int a = 5, b =10;
+       int c = max(a, b);  // error: the function max doesn't have the same signature as declaration before !
+       return c;
    }
    
    int max(int a, int b)
    {
-   	if (a < b)
-   	{
-   		return b;
-   	} else {
-   		return a;
-   	}
+       if (a < b)
+       {
+           return b;
+       } else {
+           return a;
+       }
    }
    ```
 
@@ -232,11 +232,11 @@
 
    ```c
    int main(){
-   	if(1){
-   		int a = 20;
-   	}
-     int b = a;
-   	return a;				// error : the variable a has not been initialized !
+       if(1){
+           int a = 20;
+       }
+       int b = a;
+       return a;				// error : the variable a has not been initialized !
    }
    ```
 
