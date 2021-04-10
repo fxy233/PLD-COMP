@@ -1,6 +1,6 @@
 6. # Compilateur H4222 de langage C
-lien github: https://github.com/fxy233/PLD-COMP.git
-lien description: https://docs.google.com/document/d/1eGIWu76q2qLuqb54eIOfVNwOtDT2kNKgQNGqfvG0bxE/edit?usp=sharing
+lien github: https://github.com/fxy233/PLD-COMP.git     
+lien description: https://docs.google.com/document/d/1eGIWu76q2qLuqb54eIOfVNwOtDT2kNKgQNGqfvG0bxE/edit?usp=sharing       
 
    #### Utilisation de notre compilateur:
    
