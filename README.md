@@ -1,4 +1,6 @@
 6. # Compilateur H4222 de langage C
+lien github: https://github.com/fxy233/PLD-COMP.git
+lien description: https://docs.google.com/document/d/1eGIWu76q2qLuqb54eIOfVNwOtDT2kNKgQNGqfvG0bxE/edit?usp=sharing
 
    #### Utilisation de notre compilateur:
    
@@ -27,11 +29,10 @@
    
       ```c
       int main (){
-             int a, b, c;
-             a = 5;
-             b = 47;
-             c = a * (a + 3) - 5 * (5 + (5 * (4 + (1)))) + b * a + a / b;
-             return c;
+          int a = 5, b, c;
+          b = 47;
+          c = a * (a + 3) - 5 * (5 + (5 * (4 + (1)))) + b * a + a / b;
+          return c;
          }
       ```
    
@@ -206,7 +207,7 @@
       }
       ```
    
-   5. Nombre de paramètres cohérent avec déclaration (fonction) 
+   5. Nombre de paramètres cohérent avec déclaration (signature de fonction) 
    
       ```c
       int max(int a)
